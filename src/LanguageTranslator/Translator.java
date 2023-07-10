@@ -10,18 +10,32 @@ public class Translator {
 
     public static void translatePrograms(ArrayList<Word> originalStack){
 
+        // TODO fix Math so that it goes in th proper order  (2 3 4 * +) goes 4 * 3 -> 12 + 2
 
         currentOperation.addAll(originalStack);
         for (Word w: originalStack) {
 
+            //TODO instead of setting the answer to math to index 0, add it at 0 so you can remove the top 2 thing after u do the calculation in the add/- method
 
             if (w.getType() == Word.wordType.STACKOPERATION) {
                 if (Objects.equals(w.getWord(), "+")) {
-                    String answer = ExecuteIntegerPlus();
+                    String answer = ExecutePlus(w);
                     currentOperation.set(0,new Word(answer,Word.determineWordType(answer)));
                 } else if (Objects.equals(w.getWord(),"-")) {
-                    String answer = ExecuteIntegerNeg();
+                    String answer = ExecuteNeg();
                     currentOperation.set(0,new Word(answer,Word.determineWordType(answer)));
+                } else if (Objects.equals(w.getWord(), "*")) {
+                    String answer = ExecuteMultiply();
+                    currentOperation.set(0,new Word(answer,Word.determineWordType(answer)));
+                } else if (Objects.equals(w.getWord(), "pop")) {
+                    ExecutePop();
+                    currentOperation.remove(w);
+                }else if (Objects.equals(w.getWord(), "swap")) {
+                    ExecuteSwap();
+                    currentOperation.remove(w);
+                }else if (Objects.equals(w.getWord(), "dup")) {
+                    ExecuteDup();
+                    currentOperation.remove(w);
                 }
             }
 
@@ -50,33 +64,46 @@ public class Translator {
     }
 
 
-    public static String ExecuteIntegerPlus(){
 
-        int total = Integer.parseInt(currentOperation.get(0).getWord()) + Integer.parseInt(currentOperation.get(1).getWord());
-        currentOperation.remove(1);
-        return Integer.toString(total);
+    public static String ExecutePlus(Word currentWord){
+        if (currentOperation.get(0).getType() == Word.wordType.NUMBERS && currentOperation.get(1).getType() == Word.wordType.NUMBERS){
+            int total = Integer.parseInt(currentOperation.get(currentOperation.indexOf(currentWord) - 1).getWord()) + Integer.parseInt(currentOperation.get(currentOperation.indexOf(currentWord) - 2).getWord());
+            currentOperation.remove(currentWord);
+            return Integer.toString(total);
+        } else if (currentOperation.get(1).getType() == Word.wordType.TEXTWORD && currentOperation.get(0).getType() == Word.wordType.TEXTWORD) {
+            String output = "";
+            output += currentOperation.get(1).getWord() + " " + currentOperation.get(0).getWord();
+            currentOperation.remove(1);
+            return output;
+        }
 
+
+        return null;
     }
 
-    public static String ExecuteIntegerNeg(){
-
+    public static String ExecuteNeg(){
+        if (currentOperation.get(0).getType() == Word.wordType.NUMBERS && currentOperation.get(1).getType() != Word.wordType.NUMBERS)  {
             int neg = Integer.parseInt(currentOperation.get(0).getWord()) * (-1);
             currentOperation.remove(1);
             return Integer.toString(neg);
-
-    }
-
-    public static String ExecuteStringPlus(ArrayList<String> stringWords){
-        String output = "";
-        for (String word: stringWords) {
-            output += (word + " ");
+        } else if (currentOperation.get(0).getType() == Word.wordType.NUMBERS && currentOperation.get(1).getType() == Word.wordType.NUMBERS) {
+            int total = Integer.parseInt(currentOperation.get(1).getWord()) - Integer.parseInt(currentOperation.get(0).getWord());
+            currentOperation.remove(1);
+            return Integer.toString(total);
+        }else if (currentOperation.get(0).getType() == Word.wordType.TEXTWORD){
+            //TODO reverse a string
+            return null;
         }
-        return output;
+        return null;
     }
 
-    public static String ExecuteStringNeg(String wordToBeReversed){
-
-        return wordToBeReversed;
+    public static String ExecuteMultiply(){
+        if (currentOperation.get(0).getType() == Word.wordType.NUMBERS && currentOperation.get(1).getType() == Word.wordType.NUMBERS) {
+            int total = Integer.parseInt(currentOperation.get(1).getWord()) * Integer.parseInt(currentOperation.get(0).getWord());
+            currentOperation.remove(1);
+            return Integer.toString(total);
+        }
+        return null;
     }
 
 
@@ -106,6 +133,22 @@ public class Translator {
         currentOperation.remove(1);
         System.out.println(currentOperation.get(0));
 
+    }
+
+    public static void ExecutePop(){
+        currentOperation.remove(0);
+    }
+
+    public static void ExecuteSwap() {
+        Word top = currentOperation.get(0);
+        Word second = currentOperation.get(1);
+        currentOperation.set(0,second);
+        currentOperation.set(1,top);
+    }
+
+    public static void ExecuteDup() {
+        Word top = currentOperation.get(0);
+        currentOperation.add(0,top);
     }
 
 }

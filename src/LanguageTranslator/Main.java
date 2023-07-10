@@ -17,7 +17,6 @@ public class Main {
             programs.add(currentWord);
         }
 
-        System.out.println(programs);
 
         Translator.translatePrograms(programs);
 

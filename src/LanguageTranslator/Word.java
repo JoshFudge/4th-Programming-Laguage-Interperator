@@ -11,7 +11,7 @@ public class Word {
     private static String stackOperationRegex = "dup|swap|pop|[+*-]";
     private static String IORegex = "in|out";
 
-    public enum wordType {NUMBERS,QUOTES,DEFINITION,STACKOPERATION,IO,OTHER}
+    public enum wordType {NUMBERS,QUOTES,DEFINITION,STACKOPERATION,IO,TEXTWORD}
 
     private String word;
     private wordType type;
@@ -61,7 +61,7 @@ public class Word {
         }
 
 
-        return wordType.OTHER;
+        return wordType.TEXTWORD;
     }
 
     @Override
