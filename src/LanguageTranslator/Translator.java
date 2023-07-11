@@ -7,49 +7,71 @@ import java.util.*;
 
 public class Translator {
     static ArrayList<Word> currentOperation = new ArrayList<>();
+    static Boolean quoteFlag = false;
 
+    static Map<String, Integer> currentDefinitions = new HashMap<>();
+
+    //TODO quotes
     public static void translatePrograms(ArrayList<Word> originalStack){
-
-        // TODO fix Math so that it goes in th proper order  (2 3 4 * +) goes 4 * 3 -> 12 + 2
+         String quoteString = "";
 
         currentOperation.addAll(originalStack);
         for (Word w: originalStack) {
 
-            //TODO instead of setting the answer to math to index 0, add it at 0 so you can remove the top 2 thing after u do the calculation in the add/- method
 
             if (w.getType() == Word.wordType.STACKOPERATION) {
                 if (Objects.equals(w.getWord(), "+")) {
                     String answer = ExecutePlus(w);
-                    currentOperation.set(0,new Word(answer,Word.determineWordType(answer)));
+                    currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
                 } else if (Objects.equals(w.getWord(),"-")) {
-                    String answer = ExecuteNeg();
-                    currentOperation.set(0,new Word(answer,Word.determineWordType(answer)));
+                    String answer = ExecuteNeg(w);
+                    currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
                 } else if (Objects.equals(w.getWord(), "*")) {
-                    String answer = ExecuteMultiply();
-                    currentOperation.set(0,new Word(answer,Word.determineWordType(answer)));
+                    String answer = ExecuteMultiply(w);
+                    currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
                 } else if (Objects.equals(w.getWord(), "pop")) {
-                    ExecutePop();
+                    ExecutePop(w);
                     currentOperation.remove(w);
                 }else if (Objects.equals(w.getWord(), "swap")) {
-                    ExecuteSwap();
+                    ExecuteSwap(w);
                     currentOperation.remove(w);
                 }else if (Objects.equals(w.getWord(), "dup")) {
-                    ExecuteDup();
+                    ExecuteDup(w);
                     currentOperation.remove(w);
                 }
+            } else if (w.getType() == Word.wordType.QUOTES || quoteFlag)
+
+             {
+                 currentOperation.remove(w);
+
+                 quoteFlag = true;
+
+                if (!Objects.equals(w.getWord(), "'")){
+                    quoteString += w.getWord();
+                    currentOperation.remove(w);
+                }
+                if (w.getType() == Word.wordType.QUOTES && quoteString != ""){
+                    quoteFlag = false;
+                    currentOperation.remove(w);
+                    currentOperation.add(0,new Word(quoteString, Word.wordType.QUOTESTRING));
+                    quoteString = "";
+                }
+
+                // TODO If word is quote and flag is false, turn flag on, until flag is turned off, add everything to a string. flag is turned off when another quote appears.
+                //TODO once you get a string of the word between the 2 quotes " ' " remove all words involved from current operation and add the output at index 0
+
+
+            }  else if (w.getType() == Word.wordType.DEFINITION){
+
+
             }
-
-
-
-
-
             else if (w.getType() == Word.wordType.IO){
                 if (Objects.equals(w.getWord(), "in")){
                     Word input = Translator.ExecuteIn();
                     currentOperation.set(currentOperation.indexOf(w), input);
                 } else if (Objects.equals(w.getWord(), "out")) {
 
-                    ExecuteOut();
+                    ExecuteOut(w);
                     currentOperation.remove(0);
                     if (!currentOperation.isEmpty() && Objects.equals(currentOperation.get(0).getWord(), "out")){
                         currentOperation.remove(0);
@@ -66,14 +88,22 @@ public class Translator {
 
 
     public static String ExecutePlus(Word currentWord){
-        if (currentOperation.get(0).getType() == Word.wordType.NUMBERS && currentOperation.get(1).getType() == Word.wordType.NUMBERS){
-            int total = Integer.parseInt(currentOperation.get(currentOperation.indexOf(currentWord) - 1).getWord()) + Integer.parseInt(currentOperation.get(currentOperation.indexOf(currentWord) - 2).getWord());
+        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+        Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
+
+        if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS){
+            int total = Integer.parseInt(firstWord.getWord()) + Integer.parseInt(secondWord.getWord());
             currentOperation.remove(currentWord);
+            currentOperation.remove(firstWord);
+            currentOperation.remove(secondWord);
             return Integer.toString(total);
-        } else if (currentOperation.get(1).getType() == Word.wordType.TEXTWORD && currentOperation.get(0).getType() == Word.wordType.TEXTWORD) {
+
+        } else if (secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING) {
             String output = "";
-            output += currentOperation.get(1).getWord() + " " + currentOperation.get(0).getWord();
-            currentOperation.remove(1);
+            output += firstWord.getWord() + " " + secondWord.getWord();
+            currentOperation.remove(currentWord);
+            currentOperation.remove(firstWord);
+            currentOperation.remove(secondWord);
             return output;
         }
 
@@ -81,26 +111,35 @@ public class Translator {
         return null;
     }
 
-    public static String ExecuteNeg(){
-        if (currentOperation.get(0).getType() == Word.wordType.NUMBERS && currentOperation.get(1).getType() != Word.wordType.NUMBERS)  {
-            int neg = Integer.parseInt(currentOperation.get(0).getWord()) * (-1);
-            currentOperation.remove(1);
+    public static String ExecuteNeg(Word currentWord){
+        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+
+        if (firstWord.getType() == Word.wordType.NUMBERS)  {
+            int neg = Integer.parseInt(firstWord.getWord()) * (-1);
+
+            currentOperation.remove(currentWord);
+            currentOperation.remove(0);
+
             return Integer.toString(neg);
-        } else if (currentOperation.get(0).getType() == Word.wordType.NUMBERS && currentOperation.get(1).getType() == Word.wordType.NUMBERS) {
-            int total = Integer.parseInt(currentOperation.get(1).getWord()) - Integer.parseInt(currentOperation.get(0).getWord());
-            currentOperation.remove(1);
-            return Integer.toString(total);
-        }else if (currentOperation.get(0).getType() == Word.wordType.TEXTWORD){
-            //TODO reverse a string
-            return null;
+
+
+        } else if (firstWord.getType() == Word.wordType.QUOTESTRING ){
+            String reverse = new StringBuilder(firstWord.getWord()).reverse().toString();
+            currentOperation.remove(currentWord);
+            return reverse;
         }
         return null;
     }
 
-    public static String ExecuteMultiply(){
-        if (currentOperation.get(0).getType() == Word.wordType.NUMBERS && currentOperation.get(1).getType() == Word.wordType.NUMBERS) {
-            int total = Integer.parseInt(currentOperation.get(1).getWord()) * Integer.parseInt(currentOperation.get(0).getWord());
-            currentOperation.remove(1);
+    public static String ExecuteMultiply(Word currentWord){
+        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+        Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
+
+        if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS) {
+            int total = Integer.parseInt(firstWord.getWord()) * Integer.parseInt(secondWord.getWord());
+            currentOperation.remove(currentWord);
+            currentOperation.remove(firstWord);
+            currentOperation.remove(secondWord);
             return Integer.toString(total);
         }
         return null;
@@ -111,7 +150,7 @@ public class Translator {
 
     }
 
-    public void ExecuteQuote(ArrayList<String>StringWords){
+    public void ExecuteQuote(){
 
     }
 
@@ -128,27 +167,29 @@ public class Translator {
         return new Word(userInput,Word.determineWordType(userInput));
     }
 
-    public static void ExecuteOut(){
+    public static void ExecuteOut(Word currentWord){
 
-        currentOperation.remove(1);
+        currentOperation.remove(currentWord);
         System.out.println(currentOperation.get(0));
 
     }
 
-    public static void ExecutePop(){
-        currentOperation.remove(0);
+    public static void ExecutePop(Word currentWord){
+        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+        currentOperation.remove(firstWord);
     }
 
-    public static void ExecuteSwap() {
-        Word top = currentOperation.get(0);
-        Word second = currentOperation.get(1);
-        currentOperation.set(0,second);
-        currentOperation.set(1,top);
+    public static void ExecuteSwap(Word currentWord) {
+        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+        Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
+
+        currentOperation.set(0,secondWord);
+        currentOperation.set(1,firstWord);
     }
 
-    public static void ExecuteDup() {
-        Word top = currentOperation.get(0);
-        currentOperation.add(0,top);
+    public static void ExecuteDup(Word currentWord) {
+        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+        currentOperation.add(0,firstWord);
     }
 
 }

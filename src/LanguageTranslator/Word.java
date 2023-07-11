@@ -11,7 +11,7 @@ public class Word {
     private static String stackOperationRegex = "dup|swap|pop|[+*-]";
     private static String IORegex = "in|out";
 
-    public enum wordType {NUMBERS,QUOTES,DEFINITION,STACKOPERATION,IO,TEXTWORD}
+    public enum wordType {NUMBERS,QUOTES,DEFINITION,STACKOPERATION,IO,QUOTESTRING}
 
     private String word;
     private wordType type;
@@ -60,8 +60,8 @@ public class Word {
             return wordType.IO;
         }
 
-
-        return wordType.TEXTWORD;
+        //TODO Throw error here, word fails validation
+        return null;
     }
 
     @Override
