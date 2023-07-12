@@ -9,7 +9,7 @@ public class Translator {
     static ArrayList<Word> currentOperation = new ArrayList<>();
     static Boolean quoteFlag = false;
 
-    static Map<String, Integer> currentDefinitions = new HashMap<>();
+    static Map<String, Word> currentDefinitions = new HashMap<>();
 
     //TODO quotes
     public static void translatePrograms(ArrayList<Word> originalStack){
@@ -20,22 +20,22 @@ public class Translator {
 
 
             if (w.getType() == Word.wordType.STACKOPERATION) {
-                if (Objects.equals(w.getWord(), "+")) {
+                if (Objects.equals(w.getText(), "+")) {
                     String answer = ExecutePlus(w);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
-                } else if (Objects.equals(w.getWord(),"-")) {
+                } else if (Objects.equals(w.getText(),"-")) {
                     String answer = ExecuteNeg(w);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
-                } else if (Objects.equals(w.getWord(), "*")) {
+                } else if (Objects.equals(w.getText(), "*")) {
                     String answer = ExecuteMultiply(w);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
-                } else if (Objects.equals(w.getWord(), "pop")) {
+                } else if (Objects.equals(w.getText(), "pop")) {
                     ExecutePop(w);
                     currentOperation.remove(w);
-                }else if (Objects.equals(w.getWord(), "swap")) {
+                }else if (Objects.equals(w.getText(), "swap")) {
                     ExecuteSwap(w);
                     currentOperation.remove(w);
-                }else if (Objects.equals(w.getWord(), "dup")) {
+                }else if (Objects.equals(w.getText(), "dup")) {
                     ExecuteDup(w);
                     currentOperation.remove(w);
                 }
@@ -46,8 +46,8 @@ public class Translator {
 
                  quoteFlag = true;
 
-                if (!Objects.equals(w.getWord(), "'")){
-                    quoteString += w.getWord();
+                if (!Objects.equals(w.getText(), "'")){
+                    quoteString += " " + w.getText() ;
                     currentOperation.remove(w);
                 }
                 if (w.getType() == Word.wordType.QUOTES && quoteString != ""){
@@ -57,31 +57,25 @@ public class Translator {
                     quoteString = "";
                 }
 
-                // TODO If word is quote and flag is false, turn flag on, until flag is turned off, add everything to a string. flag is turned off when another quote appears.
-                //TODO once you get a string of the word between the 2 quotes " ' " remove all words involved from current operation and add the output at index 0
-
 
             }  else if (w.getType() == Word.wordType.DEFINITION){
 
-
             }
             else if (w.getType() == Word.wordType.IO){
-                if (Objects.equals(w.getWord(), "in")){
+                if (Objects.equals(w.getText(), "in")){
                     Word input = Translator.ExecuteIn();
                     currentOperation.set(currentOperation.indexOf(w), input);
-                } else if (Objects.equals(w.getWord(), "out")) {
+                } else if (Objects.equals(w.getText(), "out")) {
 
                     ExecuteOut(w);
                     currentOperation.remove(0);
-                    if (!currentOperation.isEmpty() && Objects.equals(currentOperation.get(0).getWord(), "out")){
+                    if (!currentOperation.isEmpty() && Objects.equals(currentOperation.get(0).getText(), "out")){
                         currentOperation.remove(0);
                     }
                 }
             }
-            
 
         }
-
 
     }
 
@@ -92,7 +86,7 @@ public class Translator {
         Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
         if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS){
-            int total = Integer.parseInt(firstWord.getWord()) + Integer.parseInt(secondWord.getWord());
+            int total = Integer.parseInt(firstWord.getText()) + Integer.parseInt(secondWord.getText());
             currentOperation.remove(currentWord);
             currentOperation.remove(firstWord);
             currentOperation.remove(secondWord);
@@ -100,7 +94,7 @@ public class Translator {
 
         } else if (secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING) {
             String output = "";
-            output += firstWord.getWord() + " " + secondWord.getWord();
+            output += firstWord.getText() + " " + secondWord.getText();
             currentOperation.remove(currentWord);
             currentOperation.remove(firstWord);
             currentOperation.remove(secondWord);
@@ -115,7 +109,7 @@ public class Translator {
         Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
 
         if (firstWord.getType() == Word.wordType.NUMBERS)  {
-            int neg = Integer.parseInt(firstWord.getWord()) * (-1);
+            int neg = Integer.parseInt(firstWord.getText()) * (-1);
 
             currentOperation.remove(currentWord);
             currentOperation.remove(0);
@@ -124,7 +118,7 @@ public class Translator {
 
 
         } else if (firstWord.getType() == Word.wordType.QUOTESTRING ){
-            String reverse = new StringBuilder(firstWord.getWord()).reverse().toString();
+            String reverse = new StringBuilder(firstWord.getText()).reverse().toString();
             currentOperation.remove(currentWord);
             return reverse;
         }
@@ -136,7 +130,7 @@ public class Translator {
         Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
         if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS) {
-            int total = Integer.parseInt(firstWord.getWord()) * Integer.parseInt(secondWord.getWord());
+            int total = Integer.parseInt(firstWord.getText()) * Integer.parseInt(secondWord.getText());
             currentOperation.remove(currentWord);
             currentOperation.remove(firstWord);
             currentOperation.remove(secondWord);
@@ -145,14 +139,6 @@ public class Translator {
         return null;
     }
 
-
-    public static void ExecuteWord(Word word){
-
-    }
-
-    public void ExecuteQuote(){
-
-    }
 
     public static Word ExecuteIn(){
         String userInput = "";

@@ -1,4 +1,3 @@
 ' Hello ' ' World! ' + out
-2 3 4 + * out
-' happiness ' out
-' peanut Butter ' - out
+' Hello World ' out
+' Hello World! ' - out
