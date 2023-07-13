@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 public class Word {
 
     // Regex used to define if a "Word" is a number
-    private static String numbersRegex = "\\d+";
+    private static String numbersRegex = "^\\d+$";
     // Regex used to define if a "Word" is a quote or will be used in a quote
     private static String quotesRegex = "[’']+";
     // Regex used to define if a "Word" will be used in  a definition
@@ -18,10 +18,13 @@ public class Word {
     // Regex used to define if a "Word" is call to run either a in or out operation on the stack
     private static String IORegex = "in|out";
 
+    private static String QuoteOrDefinition = "\\p{L}+";
+
     // Enumeration used to give each word a classification.
     // Classifications include : Numbers, Quotes, Definition, Stack Operations,
     // Input and output, and a string currently being used in a quote
-    public enum wordType {NUMBERS,QUOTES,DEFINITION,STACKOPERATION,IO,QUOTESTRING}
+    //QuoteString and PotentialDefinition are used to temporarily mark any string that may be used as part of a quote operation or used as a definition key
+    public enum wordType {NUMBERS,QUOTES,DEFINITION,STACKOPERATION,IO,QUOTESTRING, PotentialDefinition}
 
     // Each "Word" has a property word and a property type.
     // text -> the text that will be a word (ex.. hello, 5, out...)
@@ -82,21 +85,31 @@ public class Word {
         Pattern IO = Pattern.compile(IORegex);
         Matcher IOMatcher = IO.matcher(word);
 
+        Pattern QOrD = Pattern.compile(QuoteOrDefinition);
+        Matcher QOrDMatcher = QOrD.matcher(word);
 
-        if (numMatcher.find()){
-            return wordType.NUMBERS;
-        } else if (quoteMatcher.find()) {
-            return wordType.QUOTES;
-        }else if (defMatcher.find()){
-            return wordType.DEFINITION;
-        } else if (stackMatcher.find()) {
-            return  wordType.STACKOPERATION;
-        } else if (IOMatcher.find()) {
-            return wordType.IO;
+        try {
+            if (numMatcher.find()){
+                return wordType.NUMBERS;
+            } else if (quoteMatcher.find()) {
+                return wordType.QUOTES;
+            }else if (defMatcher.find()){
+                return wordType.DEFINITION;
+            } else if (stackMatcher.find()) {
+                return  wordType.STACKOPERATION;
+            } else if (IOMatcher.find()) {
+                return wordType.IO;
+            }else if (QOrDMatcher.find()){
+                return wordType.PotentialDefinition;
+            }else {
+                throw new RuntimeException("Error when reading Words, Please ensure your script contains proper syntax for this Language");
+            }
+        }catch (RuntimeException e){
+            throw new java.lang.RuntimeException(e);
         }
 
+
         //TODO Throw error here, word fails validation
-        return null;
     }
 
     /**

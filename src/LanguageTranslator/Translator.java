@@ -20,8 +20,9 @@ public class Translator {
 
         currentOperation.addAll(originalStack);
         for (Word w: originalStack) {
+            if (w.getType() == Word.wordType.NUMBERS){}
 
-            if (w.getType() == Word.wordType.STACKOPERATION) {
+            else if (w.getType() == Word.wordType.STACKOPERATION) {
                 if (Objects.equals(w.getText(), "+")) {
                     String answer = ExecutePlus(w);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
@@ -62,29 +63,36 @@ public class Translator {
 
 
             }  else if (w.getType() == Word.wordType.DEFINITION || definitionFlag){
-                if (w.getType() == Word.wordType.DEFINITION && currentDefinition.equals("")){
+                try {
+                    if (w.getType() == Word.wordType.DEFINITION && currentDefinition.equals("")){
 
-                    definitionFlag = true;
-                    currentOperation.remove(w);
+                        definitionFlag = true;
+                        currentOperation.remove(w);
+                    }
+
+                    else if (w.getType() != Word.wordType.DEFINITION && w.getType() == Word.wordType.PotentialDefinition){
+                        // get the definition identifier
+                        currentDefinition += w.getText();
+                        currentOperation.remove(w);
+
+                    }  else if (w.getType() == Word.wordType.DEFINITION && !currentDefinition.equals("")) {
+
+                        Word definitionValue = new Word(currentOperation.get(0).toString(),currentOperation.get(0).getType());
+
+                        currentDefinitions.put(currentDefinition,definitionValue);
+
+                        definitionFlag = false;
+                        currentDefinition = "";
+                        currentOperation.remove(w);
+                        currentOperation.remove(0);
+
+                    } else {
+                        throw new RuntimeException("There is a problem with your Definition Code! Please ensure you have two ':' surrounding your definition");
+                    }
+                } catch (RuntimeException e){
+                    throw new java.lang.RuntimeException(e);
                 }
 
-                if (w.getType() != Word.wordType.DEFINITION && w.getType() == null){
-                    // get the definition identifier
-                    currentDefinition += w.getText();
-                    currentOperation.remove(w);
-
-                }  else if (w.getType() == Word.wordType.DEFINITION && !currentDefinition.equals("")) {
-
-                    Word definitionValue = new Word(currentOperation.get(0).toString(),currentOperation.get(0).getType());
-
-                    currentDefinitions.put(currentDefinition,definitionValue);
-
-                    definitionFlag = false;
-                    currentDefinition = "";
-                    currentOperation.remove(w);
-                    currentOperation.remove(0);
-
-                }
 
             }
             else if (w.getType() == Word.wordType.IO){
@@ -101,6 +109,8 @@ public class Translator {
 
                 currentOperation.add(0, currentDefinitions.get(w.toString()));
                 currentOperation.remove(w);
+            } else if (w.getType() == Word.wordType.PotentialDefinition) {
+                throw new RuntimeException("Syntax Error! Word " + w.getText() + " is not a valid Word, Operation, Or Definition");
             }
 
         }
@@ -133,7 +143,9 @@ public class Translator {
             }
 
 
-        } catch (RuntimeException e) {
+        } catch (IndexOutOfBoundsException IOE){
+            throw new RuntimeException("There is a Syntax Error in your code! Please ensure it is coded correctly and try again!");
+        }catch (RuntimeException e) {
             throw new java.lang.RuntimeException(e);
         }
 
@@ -186,7 +198,9 @@ public class Translator {
             }else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '*' Operator correctly");
             }
-        }catch (RuntimeException e){
+        } catch (IndexOutOfBoundsException IOE){
+            throw new RuntimeException("There is a Syntax Error in your code! Please ensure it is coded correctly and try again!");
+        }catch (RuntimeException e ){
             throw new java.lang.RuntimeException(e);
         }
     }

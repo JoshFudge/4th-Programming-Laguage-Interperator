@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-
+    //TODO set up the commandline argument stuff, try sqashing any other bugs found
     public static void main(String[] args) throws RuntimeException {
         ArrayList<Word> programs = new ArrayList<>();
         File FourthProgramingLanguageScript = new File("src/LanguageTranslator/languageScript.txt");
