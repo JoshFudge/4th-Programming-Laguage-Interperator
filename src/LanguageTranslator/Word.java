@@ -85,9 +85,12 @@ public class Word {
         Pattern IO = Pattern.compile(IORegex);
         Matcher IOMatcher = IO.matcher(word);
 
+        // Initialize a pattern and matcher used to check if a "Word" could potentially be used as part of a..
+        // Quote or used as a Definition Key
         Pattern QOrD = Pattern.compile(QuoteOrDefinition);
         Matcher QOrDMatcher = QOrD.matcher(word);
 
+        //
         try {
             if (numMatcher.find()){
                 return wordType.NUMBERS;
@@ -109,7 +112,7 @@ public class Word {
         }
 
 
-        //TODO Throw error here, word fails validation
+
     }
 
     /**

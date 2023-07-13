@@ -19,39 +19,41 @@ public class Translator {
          String currentDefinition = "";
 
         currentOperation.addAll(originalStack);
-        for (Word w: originalStack) {
-            if (w.getType() == Word.wordType.NUMBERS){}
+        for (Word CurrentWord: originalStack) {
+            if (CurrentWord.getType() == Word.wordType.NUMBERS){}
 
-            else if (w.getType() == Word.wordType.STACKOPERATION) {
-                if (Objects.equals(w.getText(), "+")) {
-                    String answer = ExecutePlus(w);
+            else if (CurrentWord.getType() == Word.wordType.STACKOPERATION) {
+                if (Objects.equals(CurrentWord.getText(), "+")) {
+                    String answer = ExecutePlus(CurrentWord);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
-                } else if (Objects.equals(w.getText(),"-")) {
-                    String answer = ExecuteNeg(w);
+                } else if (Objects.equals(CurrentWord.getText(),"-")) {
+                    String answer = ExecuteNeg(CurrentWord);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
-                } else if (Objects.equals(w.getText(), "*")) {
-                    String answer = ExecuteMultiply(w);
+                } else if (Objects.equals(CurrentWord.getText(), "*")) {
+                    //TODO make it so the answer is added in the method and set the Wordtype based on what kind of operation was done
+                    // (ie.. 6 * 7 -. Number, String Regex -> Quote/String)
+                    String answer = ExecuteMultiply(CurrentWord);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
-                } else if (Objects.equals(w.getText(), "pop")) {
-                    ExecutePop(w);
-                }else if (Objects.equals(w.getText(), "swap")) {
-                    ExecuteSwap(w);
-                }else if (Objects.equals(w.getText(), "dup")) {
-                    ExecuteDup(w);
+                } else if (Objects.equals(CurrentWord.getText(), "pop")) {
+                    ExecutePop(CurrentWord);
+                }else if (Objects.equals(CurrentWord.getText(), "swap")) {
+                    ExecuteSwap(CurrentWord);
+                }else if (Objects.equals(CurrentWord.getText(), "dup")) {
+                    ExecuteDup(CurrentWord);
                 }
-            } else if (w.getType() == Word.wordType.QUOTES || quoteFlag) {
+            } else if (CurrentWord.getType() == Word.wordType.QUOTES || quoteFlag) {
                 try {
-                    if (w.getType() == Word.wordType.QUOTES && quoteString.equals("")) {
-                        currentOperation.remove(w);
+                    if (CurrentWord.getType() == Word.wordType.QUOTES && quoteString.equals("")) {
+                        currentOperation.remove(CurrentWord);
                         quoteFlag = true;
                     }
-                    else if (!Objects.equals(w.getText(), "'")){
-                        quoteString +=  w.getText() ;
-                        currentOperation.remove(w);
+                    else if (!Objects.equals(CurrentWord.getText(), "'")){
+                        quoteString +=  CurrentWord.getText() ;
+                        currentOperation.remove(CurrentWord);
                     }
-                    else if (w.getType() == Word.wordType.QUOTES && !quoteString.equals("")) {
+                    else if (CurrentWord.getType() == Word.wordType.QUOTES && !quoteString.equals("")) {
                      quoteFlag = false;
-                     currentOperation.remove(w);
+                     currentOperation.remove(CurrentWord);
                      currentOperation.add(0, new Word(quoteString, Word.wordType.QUOTESTRING));
                      quoteString = "";
                     } else {
@@ -62,20 +64,20 @@ public class Translator {
                 }
 
 
-            }  else if (w.getType() == Word.wordType.DEFINITION || definitionFlag){
+            }  else if (CurrentWord.getType() == Word.wordType.DEFINITION || definitionFlag){
                 try {
-                    if (w.getType() == Word.wordType.DEFINITION && currentDefinition.equals("")){
+                    if (CurrentWord.getType() == Word.wordType.DEFINITION && currentDefinition.equals("")){
 
                         definitionFlag = true;
-                        currentOperation.remove(w);
+                        currentOperation.remove(CurrentWord);
                     }
 
-                    else if (w.getType() != Word.wordType.DEFINITION && w.getType() == Word.wordType.PotentialDefinition){
+                    else if (CurrentWord.getType() != Word.wordType.DEFINITION && CurrentWord.getType() == Word.wordType.PotentialDefinition){
                         // get the definition identifier
-                        currentDefinition += w.getText();
-                        currentOperation.remove(w);
+                        currentDefinition += CurrentWord.getText();
+                        currentOperation.remove(CurrentWord);
 
-                    }  else if (w.getType() == Word.wordType.DEFINITION && !currentDefinition.equals("")) {
+                    }  else if (CurrentWord.getType() == Word.wordType.DEFINITION && !currentDefinition.equals("")) {
 
                         Word definitionValue = new Word(currentOperation.get(0).toString(),currentOperation.get(0).getType());
 
@@ -83,7 +85,7 @@ public class Translator {
 
                         definitionFlag = false;
                         currentDefinition = "";
-                        currentOperation.remove(w);
+                        currentOperation.remove(CurrentWord);
                         currentOperation.remove(0);
 
                     } else {
@@ -95,22 +97,22 @@ public class Translator {
 
 
             }
-            else if (w.getType() == Word.wordType.IO){
-                if (Objects.equals(w.getText(), "in")){
+            else if (CurrentWord.getType() == Word.wordType.IO){
+                if (Objects.equals(CurrentWord.getText(), "in")){
                     Word input = Translator.ExecuteIn();
-                    currentOperation.set(currentOperation.indexOf(w), input);
-                } else if (Objects.equals(w.getText(), "out")) {
-                    ExecuteOut(w);
+                    currentOperation.set(currentOperation.indexOf(CurrentWord), input);
+                } else if (Objects.equals(CurrentWord.getText(), "out")) {
+                    ExecuteOut(CurrentWord);
                     if (!currentOperation.isEmpty() && Objects.equals(currentOperation.get(0).getText(), "out")){
                         currentOperation.remove(0);
                     }
                 }
-            } else if (currentDefinitions.containsKey(w.getText())) {
+            } else if (currentDefinitions.containsKey(CurrentWord.getText())) {
 
-                currentOperation.add(0, currentDefinitions.get(w.toString()));
-                currentOperation.remove(w);
-            } else if (w.getType() == Word.wordType.PotentialDefinition) {
-                throw new RuntimeException("Syntax Error! Word " + w.getText() + " is not a valid Word, Operation, Or Definition");
+                currentOperation.add(0, currentDefinitions.get(CurrentWord.toString()));
+                currentOperation.remove(CurrentWord);
+            } else if (CurrentWord.getType() == Word.wordType.PotentialDefinition) {
+                throw new RuntimeException("Syntax Error! Word " + CurrentWord.getText() + " is not a valid Word, Operation, Or Definition");
             }
 
         }
@@ -164,7 +166,7 @@ public class Translator {
                 return Integer.toString(neg);
 
 
-            } else if (firstWord.getType() == Word.wordType.QUOTESTRING ){
+            } else if (firstWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.PotentialDefinition ){
                 String reverse = new StringBuilder(firstWord.getText()).reverse().toString();
                 currentOperation.remove(currentWord);
                 return reverse;
@@ -219,50 +221,95 @@ public class Translator {
         return new Word(userInput,Word.determineWordType(userInput));
     }
 
+    /**
+     * Method when called will conduct the specific operations on the stack
+     * to replicate the "Out" keyword command
+     * @param currentWord The current word on the stack being executed 'out'
+     */
     public static void ExecuteOut(Word currentWord){
         try {
-            currentOperation.remove(currentWord);
+            // Print out the top Word of the stack
             System.out.println(currentOperation.get(0));
+            // Remove the top item of the stack as it has been output
             currentOperation.remove(0);
+            // remove the 'out' word as it has been executed
+            currentOperation.remove(currentWord);
+
+            // If a IndexOutOfBounds Exception is caught
+            // caused by no words available to display
         }catch (IndexOutOfBoundsException e){
-            throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'out' command correctly");
+            // Throw and error and display an error message
+            throw new RuntimeException("An error occurred while translating your code! Please ensure there is something to output on the stack.");
         }
     }
 
+    /**
+     * Method when called will conduct the specific operations on the stack
+     * to replicate the "Pop" keyword command
+     * @param currentWord The current word on the stack being executed 'pop'
+     */
     public static void ExecutePop(Word currentWord){
         try{
+            // Attempt to get the Word that is on top of the stack
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+            // Remove that word from the stack
             currentOperation.remove(firstWord);
+            // Remove the 'pop' command as it has been executed
             currentOperation.remove(currentWord);
+
+            // If a IndexOutOfBounds Exception is caught
+            // caused by no words available to pop
         }catch (IndexOutOfBoundsException e){
+            // Throw and error and display an error message
             throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'pop' command correctly");
         }
-
     }
 
+    /**
+     * Method when called will conduct the specific operations on the stack
+     * to replicate the "Swap" keyword command
+     * @param currentWord The current word on the stack being executed 'swap'
+     */
     public static void ExecuteSwap(Word currentWord) {
         try {
+            // Attempt to get the two words from the stack that will be swapped
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
             Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
+            // Set the top of the stack as the word that was initially second
             currentOperation.set(0,secondWord);
+            // Set the second word of the stack as the word that was initially first
             currentOperation.set(1,firstWord);
+            // Remove the 'swap' word from the stack
             currentOperation.remove(currentWord);
-        } catch (IndexOutOfBoundsException e){
-            throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'swap' command correctly");
-        }
 
+            // If a IndexOutOfBounds Exception is caught
+            // caused by not enough items on the stack to swap...
+        } catch (IndexOutOfBoundsException e){
+            // Throw and error and display an error message
+            throw new RuntimeException("An error occurred while translating your code! Please ensure that there are words available on the stack to swap.");
+        }
     }
 
+    /**
+     * Method when called will conduct the specific operations on the stack
+     * to replicate the "Dup" keyword command
+     * @param currentWord The current word being executed "dup"
+     */
     public static void ExecuteDup(Word currentWord) {
         try {
+            // Get the top word on the stack
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+            // Add another version of the first item on the stack to the stack. Duplicating it
             currentOperation.add(0,firstWord);
+            // Remove the 'Dup' command from the stack
             currentOperation.remove(currentWord);
 
+            // If a IndexOutOfBounds Exception is caught
+            // caused by no item on the stack prior to the dup command..
         }catch (IndexOutOfBoundsException e ){
-            throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'dup' command correctly");
+            // Throw and error and display an error message
+            throw new RuntimeException("An error occurred while translating your code! Please ensure there is an Word available to duplicate on the top of the stack.");
         }
     }
-
 }
