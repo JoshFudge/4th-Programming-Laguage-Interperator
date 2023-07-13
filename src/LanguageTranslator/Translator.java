@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.regex.Pattern;
+
 
 public class Translator {
     static ArrayList<Word> currentOperation = new ArrayList<>();
@@ -13,14 +13,13 @@ public class Translator {
 
     static Map<String, Word> currentDefinitions = new HashMap<>();
 
-    //TODO quotes
-    public static void translatePrograms(ArrayList<Word> originalStack) throws SyntaxException {
+    //TODO Exception Handling on definitions and creating words that shouldnt work
+    public static void translatePrograms(ArrayList<Word> originalStack) throws RuntimeException {
          String quoteString = "";
          String currentDefinition = "";
 
         currentOperation.addAll(originalStack);
         for (Word w: originalStack) {
-
 
             if (w.getType() == Word.wordType.STACKOPERATION) {
                 if (Objects.equals(w.getText(), "+")) {
@@ -34,30 +33,31 @@ public class Translator {
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
                 } else if (Objects.equals(w.getText(), "pop")) {
                     ExecutePop(w);
-                    currentOperation.remove(w);
                 }else if (Objects.equals(w.getText(), "swap")) {
                     ExecuteSwap(w);
-                    currentOperation.remove(w);
                 }else if (Objects.equals(w.getText(), "dup")) {
                     ExecuteDup(w);
-                    currentOperation.remove(w);
                 }
-            } else if (w.getType() == Word.wordType.QUOTES || quoteFlag)
-
-             {
-                 currentOperation.remove(w);
-
-                 quoteFlag = true;
-
-                if (!Objects.equals(w.getText(), "'")){
-                    quoteString +=  w.getText() ;
-                    currentOperation.remove(w);
-                }
-                if (w.getType() == Word.wordType.QUOTES && !quoteString.equals("")){
-                    quoteFlag = false;
-                    currentOperation.remove(w);
-                    currentOperation.add(0,new Word(quoteString, Word.wordType.QUOTESTRING));
-                    quoteString = "";
+            } else if (w.getType() == Word.wordType.QUOTES || quoteFlag) {
+                try {
+                    if (w.getType() == Word.wordType.QUOTES && quoteString.equals("")) {
+                        currentOperation.remove(w);
+                        quoteFlag = true;
+                    }
+                    else if (!Objects.equals(w.getText(), "'")){
+                        quoteString +=  w.getText() ;
+                        currentOperation.remove(w);
+                    }
+                    else if (w.getType() == Word.wordType.QUOTES && !quoteString.equals("")) {
+                     quoteFlag = false;
+                     currentOperation.remove(w);
+                     currentOperation.add(0, new Word(quoteString, Word.wordType.QUOTESTRING));
+                     quoteString = "";
+                    } else {
+                        throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the quote operators correctly");
+                    }
+                }catch (RuntimeException e){
+                    throw new java.lang.RuntimeException(e);
                 }
 
 
@@ -92,9 +92,7 @@ public class Translator {
                     Word input = Translator.ExecuteIn();
                     currentOperation.set(currentOperation.indexOf(w), input);
                 } else if (Objects.equals(w.getText(), "out")) {
-
                     ExecuteOut(w);
-                    currentOperation.remove(0);
                     if (!currentOperation.isEmpty() && Objects.equals(currentOperation.get(0).getText(), "out")){
                         currentOperation.remove(0);
                     }
@@ -131,12 +129,12 @@ public class Translator {
                 currentOperation.remove(secondWord);
                 return output;
             }else {
-                throw new SyntaxException("An error occurred while translating your code");
+                throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '+' Operator Correctly");
             }
 
 
-        } catch (SyntaxException e) {
-            throw new RuntimeException(e);
+        } catch (RuntimeException e) {
+            throw new java.lang.RuntimeException(e);
         }
 
     }
@@ -159,12 +157,11 @@ public class Translator {
                 currentOperation.remove(currentWord);
                 return reverse;
             }else {
-                throw new SyntaxException("An error occurred while translating your code");
+                throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '-' Operator Correctly");
             }
 
-        }catch (SyntaxException se){
-            System.out.println("SYNTAX ERROR!! Please check your file for any program errors");
-            throw new RuntimeException(se);
+        }catch (RuntimeException se){
+            throw new java.lang.RuntimeException(se);
         }
     }
 
@@ -187,12 +184,10 @@ public class Translator {
                 currentOperation.remove(secondWord);
                 return secondWord.getText() + result[1];
             }else {
-                throw new SyntaxException("An error occurred while translating your code");
+                throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '*' Operator correctly");
             }
-
-        }catch (SyntaxException e){
-            System.out.println("SYNTAX ERROR!! Please check your file for any program errors");
-            throw new RuntimeException(e);
+        }catch (RuntimeException e){
+            throw new java.lang.RuntimeException(e);
         }
     }
 
@@ -205,34 +200,55 @@ public class Translator {
 
             userInput = br.readLine();
         }catch (IOException e){
-            System.out.println("ERROR!!!!! :" + e);
+            System.out.println("Error Occurred! Please ensure you entered valid data" + e);
         }
         return new Word(userInput,Word.determineWordType(userInput));
     }
 
     public static void ExecuteOut(Word currentWord){
-
-        currentOperation.remove(currentWord);
-        System.out.println(currentOperation.get(0));
-
+        try {
+            currentOperation.remove(currentWord);
+            System.out.println(currentOperation.get(0));
+            currentOperation.remove(0);
+        }catch (IndexOutOfBoundsException e){
+            throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'out' command correctly");
+        }
     }
 
     public static void ExecutePop(Word currentWord){
-        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
-        currentOperation.remove(firstWord);
+        try{
+            Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+            currentOperation.remove(firstWord);
+            currentOperation.remove(currentWord);
+        }catch (IndexOutOfBoundsException e){
+            throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'pop' command correctly");
+        }
+
     }
 
     public static void ExecuteSwap(Word currentWord) {
-        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
-        Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
+        try {
+            Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+            Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
-        currentOperation.set(0,secondWord);
-        currentOperation.set(1,firstWord);
+            currentOperation.set(0,secondWord);
+            currentOperation.set(1,firstWord);
+            currentOperation.remove(currentWord);
+        } catch (IndexOutOfBoundsException e){
+            throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'swap' command correctly");
+        }
+
     }
 
     public static void ExecuteDup(Word currentWord) {
-        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
-        currentOperation.add(0,firstWord);
+        try {
+            Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+            currentOperation.add(0,firstWord);
+            currentOperation.remove(currentWord);
+
+        }catch (IndexOutOfBoundsException e ){
+            throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'dup' command correctly");
+        }
     }
 
 }

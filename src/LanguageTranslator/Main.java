@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) throws SyntaxException {
+    public static void main(String[] args) throws RuntimeException {
         ArrayList<Word> programs = new ArrayList<>();
         File FourthProgramingLanguageScript = new File("src/LanguageTranslator/languageScript.txt");
         BufferedReader reader = getFileReader(FourthProgramingLanguageScript);
@@ -34,7 +34,7 @@ public class Main {
                 linesRead.add(line);
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new java.lang.RuntimeException(e);
         }
 
         // Initialize an arraylist for each word with the whitespace removed
@@ -63,7 +63,7 @@ public class Main {
         try {
             br = new BufferedReader(new FileReader(file));
         }catch (FileNotFoundException e) {
-            throw new RuntimeException("File Not Found",e);
+            throw new java.lang.RuntimeException("File Not Found",e);
         }
         return br ;
     }
