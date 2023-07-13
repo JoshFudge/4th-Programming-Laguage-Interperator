@@ -5,7 +5,7 @@ import java.util.*;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SyntaxException {
         ArrayList<Word> programs = new ArrayList<>();
         File FourthProgramingLanguageScript = new File("src/LanguageTranslator/languageScript.txt");
         BufferedReader reader = getFileReader(FourthProgramingLanguageScript);

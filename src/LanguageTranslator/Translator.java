@@ -4,16 +4,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class Translator {
     static ArrayList<Word> currentOperation = new ArrayList<>();
     static Boolean quoteFlag = false;
+    static Boolean definitionFlag = false;
 
     static Map<String, Word> currentDefinitions = new HashMap<>();
 
     //TODO quotes
-    public static void translatePrograms(ArrayList<Word> originalStack){
+    public static void translatePrograms(ArrayList<Word> originalStack) throws SyntaxException {
          String quoteString = "";
+         String currentDefinition = "";
 
         currentOperation.addAll(originalStack);
         for (Word w: originalStack) {
@@ -47,10 +50,10 @@ public class Translator {
                  quoteFlag = true;
 
                 if (!Objects.equals(w.getText(), "'")){
-                    quoteString += " " + w.getText() ;
+                    quoteString +=  w.getText() ;
                     currentOperation.remove(w);
                 }
-                if (w.getType() == Word.wordType.QUOTES && quoteString != ""){
+                if (w.getType() == Word.wordType.QUOTES && !quoteString.equals("")){
                     quoteFlag = false;
                     currentOperation.remove(w);
                     currentOperation.add(0,new Word(quoteString, Word.wordType.QUOTESTRING));
@@ -58,7 +61,30 @@ public class Translator {
                 }
 
 
-            }  else if (w.getType() == Word.wordType.DEFINITION){
+            }  else if (w.getType() == Word.wordType.DEFINITION || definitionFlag){
+                if (w.getType() == Word.wordType.DEFINITION && currentDefinition.equals("")){
+
+                    definitionFlag = true;
+                    currentOperation.remove(w);
+                }
+
+                if (w.getType() != Word.wordType.DEFINITION && w.getType() == null){
+                    // get the definition identifier
+                    currentDefinition += w.getText();
+                    currentOperation.remove(w);
+
+                }  else if (w.getType() == Word.wordType.DEFINITION && !currentDefinition.equals("")) {
+
+                    Word definitionValue = new Word(currentOperation.get(0).toString(),currentOperation.get(0).getType());
+
+                    currentDefinitions.put(currentDefinition,definitionValue);
+
+                    definitionFlag = false;
+                    currentDefinition = "";
+                    currentOperation.remove(w);
+                    currentOperation.remove(0);
+
+                }
 
             }
             else if (w.getType() == Word.wordType.IO){
@@ -73,6 +99,10 @@ public class Translator {
                         currentOperation.remove(0);
                     }
                 }
+            } else if (currentDefinitions.containsKey(w.getText())) {
+
+                currentOperation.add(0, currentDefinitions.get(w.toString()));
+                currentOperation.remove(w);
             }
 
         }
@@ -82,61 +112,88 @@ public class Translator {
 
 
     public static String ExecutePlus(Word currentWord){
-        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
-        Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
+        try{
+            Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+            Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
-        if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS){
-            int total = Integer.parseInt(firstWord.getText()) + Integer.parseInt(secondWord.getText());
-            currentOperation.remove(currentWord);
-            currentOperation.remove(firstWord);
-            currentOperation.remove(secondWord);
-            return Integer.toString(total);
+            if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS){
+                int total = Integer.parseInt(firstWord.getText()) + Integer.parseInt(secondWord.getText());
+                currentOperation.remove(currentWord);
+                currentOperation.remove(firstWord);
+                currentOperation.remove(secondWord);
+                return Integer.toString(total);
 
-        } else if (secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING) {
-            String output = "";
-            output += firstWord.getText() + " " + secondWord.getText();
-            currentOperation.remove(currentWord);
-            currentOperation.remove(firstWord);
-            currentOperation.remove(secondWord);
-            return output;
+            } else if (secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING) {
+                String output = "";
+                output += firstWord.getText() + " " + secondWord.getText();
+                currentOperation.remove(currentWord);
+                currentOperation.remove(firstWord);
+                currentOperation.remove(secondWord);
+                return output;
+            }else {
+                throw new SyntaxException("An error occurred while translating your code");
+            }
+
+
+        } catch (SyntaxException e) {
+            throw new RuntimeException(e);
         }
 
-
-        return null;
     }
 
-    public static String ExecuteNeg(Word currentWord){
-        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+    public static String ExecuteNeg(Word currentWord)  {
+        try{
+            Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
 
-        if (firstWord.getType() == Word.wordType.NUMBERS)  {
-            int neg = Integer.parseInt(firstWord.getText()) * (-1);
+            if (firstWord.getType() == Word.wordType.NUMBERS)  {
+                int neg = Integer.parseInt(firstWord.getText()) * (-1);
 
-            currentOperation.remove(currentWord);
-            currentOperation.remove(0);
+                currentOperation.remove(currentWord);
+                currentOperation.remove(0);
 
-            return Integer.toString(neg);
+                return Integer.toString(neg);
 
 
-        } else if (firstWord.getType() == Word.wordType.QUOTESTRING ){
-            String reverse = new StringBuilder(firstWord.getText()).reverse().toString();
-            currentOperation.remove(currentWord);
-            return reverse;
+            } else if (firstWord.getType() == Word.wordType.QUOTESTRING ){
+                String reverse = new StringBuilder(firstWord.getText()).reverse().toString();
+                currentOperation.remove(currentWord);
+                return reverse;
+            }else {
+                throw new SyntaxException("An error occurred while translating your code");
+            }
+
+        }catch (SyntaxException se){
+            System.out.println("SYNTAX ERROR!! Please check your file for any program errors");
+            throw new RuntimeException(se);
         }
-        return null;
     }
 
     public static String ExecuteMultiply(Word currentWord){
-        Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
-        Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
+        try {
+            Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
+            Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
-        if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS) {
-            int total = Integer.parseInt(firstWord.getText()) * Integer.parseInt(secondWord.getText());
-            currentOperation.remove(currentWord);
-            currentOperation.remove(firstWord);
-            currentOperation.remove(secondWord);
-            return Integer.toString(total);
+            if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS) {
+                int total = Integer.parseInt(firstWord.getText()) * Integer.parseInt(secondWord.getText());
+                currentOperation.remove(currentWord);
+                currentOperation.remove(firstWord);
+                currentOperation.remove(secondWord);
+                return Integer.toString(total);
+            } else if ((secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING)) {
+
+                String[] result = firstWord.getText().split(secondWord.getText());
+                currentOperation.remove(currentWord);
+                currentOperation.remove(firstWord);
+                currentOperation.remove(secondWord);
+                return secondWord.getText() + result[1];
+            }else {
+                throw new SyntaxException("An error occurred while translating your code");
+            }
+
+        }catch (SyntaxException e){
+            System.out.println("SYNTAX ERROR!! Please check your file for any program errors");
+            throw new RuntimeException(e);
         }
-        return null;
     }
 
 
