@@ -90,7 +90,7 @@ public class Word {
         Pattern QOrD = Pattern.compile(QuoteOrDefinition);
         Matcher QOrDMatcher = QOrD.matcher(word);
 
-        //
+        //Check to determine a words
         try {
             if (numMatcher.find()){
                 return wordType.NUMBERS;

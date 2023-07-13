@@ -13,7 +13,7 @@ public class Translator {
 
     static Map<String, Word> currentDefinitions = new HashMap<>();
 
-    //TODO Exception Handling on definitions and creating words that shouldnt work
+
     public static void translatePrograms(ArrayList<Word> originalStack) throws RuntimeException {
          String quoteString = "";
          String currentDefinition = "";
@@ -208,16 +208,25 @@ public class Translator {
     }
 
 
+    /**
+     * Method when called will conduct the specific operations on the stack
+     * to replicate the "In" keyword command
+     * @return User Input as a Word Object
+     */
     public static Word ExecuteIn(){
+        // Initialize a string that will eventually contain the user input
         String userInput = "";
         try {
+            // Get input from the user
             System.out.println("Enter a value: ");
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
             userInput = br.readLine();
+
+            // Catch any exceptions
         }catch (IOException e){
             System.out.println("Error Occurred! Please ensure you entered valid data" + e);
         }
+        // Return the user input created into a word object
         return new Word(userInput,Word.determineWordType(userInput));
     }
 
