@@ -6,8 +6,14 @@ import java.util.*;
 public class Main {
     //TODO set up the commandline argument stuff, try sqashing any other bugs found
     public static void main(String[] args) throws RuntimeException {
+        if (args.length != 1){
+            throw new IllegalArgumentException("Program expects a file Path to read from ");
+        }
+
+
         ArrayList<Word> programs = new ArrayList<>();
-        File FourthProgramingLanguageScript = new File("src/LanguageTranslator/languageScript.txt");
+        File FourthProgramingLanguageScript = new File(args[0]);
+//        File FourthProgramingLanguageScript = new File("src/LanguageTranslator/languageScript.txt");
         BufferedReader reader = getFileReader(FourthProgramingLanguageScript);
         String[] script = readWordsToArray(reader);
 

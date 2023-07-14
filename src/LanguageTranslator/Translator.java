@@ -30,8 +30,6 @@ public class Translator {
                     String answer = ExecuteNeg(CurrentWord);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
                 } else if (Objects.equals(CurrentWord.getText(), "*")) {
-                    //TODO make it so the answer is added in the method and set the Wordtype based on what kind of operation was done
-                    // (ie.. 6 * 7 -. Number, String Regex -> Quote/String)
                     String answer = ExecuteMultiply(CurrentWord);
                     currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
                 } else if (Objects.equals(CurrentWord.getText(), "pop")) {
@@ -48,7 +46,7 @@ public class Translator {
                         quoteFlag = true;
                     }
                     else if (!Objects.equals(CurrentWord.getText(), "'")){
-                        quoteString +=  CurrentWord.getText() ;
+                        quoteString +=  CurrentWord.getText() + " ";
                         currentOperation.remove(CurrentWord);
                     }
                     else if (CurrentWord.getType() == Word.wordType.QUOTES && !quoteString.equals("")) {
@@ -191,12 +189,27 @@ public class Translator {
                 currentOperation.remove(secondWord);
                 return Integer.toString(total);
             } else if ((secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING)) {
+                String firstWordString = firstWord.getText().replaceAll("\\s+","");
+                String secondWordString = secondWord.getText().replaceAll("\\s+","");
 
-                String[] result = firstWord.getText().split(secondWord.getText());
+                String[] result = firstWord.getText().split(secondWord.getText().replaceAll("\\s+",""));
+//                System.out.println(Arrays.toString(result));
                 currentOperation.remove(currentWord);
                 currentOperation.remove(firstWord);
                 currentOperation.remove(secondWord);
-                return secondWord.getText() + result[1];
+//                if (result.length == 2){
+//                    return secondWord.getText().replaceAll("\\s+","") + result[result.length - 1];
+//                }else {
+//                System.out.println(secondWordString);
+//                System.out.println(firstWordString.replaceFirst(secondWordString,"") + "HERE!!!");
+//                System.out.println(firstWordString + "    ----- FIRST");
+//                System.out.println(secondWordString + "      ------- SECOND");
+//                String regex = ".*" + secondWordString + "(.*)";
+//                System.out.println(regex + "     REGEX ------");
+                //TODO FIGURE OUT REGEX STUFF
+                    return secondWordString + firstWord.getText().replaceAll(".*" + secondWordString + "(.*)","$1");
+//                }
+
             }else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '*' Operator correctly");
             }
