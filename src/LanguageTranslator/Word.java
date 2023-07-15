@@ -90,29 +90,34 @@ public class Word {
         Pattern QOrD = Pattern.compile(QuoteOrDefinition);
         Matcher QOrDMatcher = QOrD.matcher(word);
 
-        //Check to determine a words h
+        //Check to determine a words wordType using the prior mentioned Regex..
         try {
+            // If the string contains only numbers, set the type to numbers
             if (numMatcher.find()){
                 return wordType.NUMBERS;
+                // If the string contains only quotation Marks, set the type to Quotes
             } else if (quoteMatcher.find()) {
                 return wordType.QUOTES;
+                // If the string contains only a colon :, set the type to definition
             }else if (defMatcher.find()){
                 return wordType.DEFINITION;
+                // If the string contains one of the stack operation keys, set the type to stack operation
             } else if (stackMatcher.find()) {
                 return  wordType.STACKOPERATION;
+                //If the string contains only "in" or "out", set the type to IO
             } else if (IOMatcher.find()) {
                 return wordType.IO;
+                // If the string is a combination of characters, set the type to potential definition so the program allows it to go through
             }else if (QOrDMatcher.find()){
                 return wordType.PotentialDefinition;
+                // If none of these match, throw a runtime error as the word is not valid
             }else {
-                throw new RuntimeException("Error when reading Words, Please ensure your script contains proper syntax for this Language");
+                throw new RuntimeException("Error when reading Words, Please ensure your script contains proper syntax for this Language... Make sure theres no whitespace in front of the first word on each line in your script :)    ");
             }
+            // Catch any errors caught along the way and display the error
         }catch (RuntimeException e){
             throw new java.lang.RuntimeException(e);
         }
-
-
-
     }
 
     /**

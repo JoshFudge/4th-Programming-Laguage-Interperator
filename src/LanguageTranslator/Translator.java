@@ -4,9 +4,13 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Translator {
+
+
     static ArrayList<Word> currentOperation = new ArrayList<>();
     static Boolean quoteFlag = false;
     static Boolean definitionFlag = false;
@@ -92,8 +96,6 @@ public class Translator {
                 } catch (RuntimeException e){
                     throw new java.lang.RuntimeException(e);
                 }
-
-
             }
             else if (CurrentWord.getType() == Word.wordType.IO){
                 if (Objects.equals(CurrentWord.getText(), "in")){
@@ -112,12 +114,8 @@ public class Translator {
             } else if (CurrentWord.getType() == Word.wordType.PotentialDefinition) {
                 throw new RuntimeException("Syntax Error! Word " + CurrentWord.getText() + " is not a valid Word, Operation, Or Definition");
             }
-
         }
-
     }
-
-
 
     public static String ExecutePlus(Word currentWord){
         try{
@@ -192,23 +190,18 @@ public class Translator {
                 String firstWordString = firstWord.getText().replaceAll("\\s+","");
                 String secondWordString = secondWord.getText().replaceAll("\\s+","");
 
-                String[] result = firstWord.getText().split(secondWord.getText().replaceAll("\\s+",""));
-//                System.out.println(Arrays.toString(result));
-                currentOperation.remove(currentWord);
-                currentOperation.remove(firstWord);
-                currentOperation.remove(secondWord);
-//                if (result.length == 2){
-//                    return secondWord.getText().replaceAll("\\s+","") + result[result.length - 1];
-//                }else {
-//                System.out.println(secondWordString);
-//                System.out.println(firstWordString.replaceFirst(secondWordString,"") + "HERE!!!");
-//                System.out.println(firstWordString + "    ----- FIRST");
-//                System.out.println(secondWordString + "      ------- SECOND");
-//                String regex = ".*" + secondWordString + "(.*)";
-//                System.out.println(regex + "     REGEX ------");
-                //TODO FIGURE OUT REGEX STUFF
-                    return secondWordString + firstWord.getText().replaceAll(".*" + secondWordString + "(.*)","$1");
-//                }
+                Pattern letterToFind = Pattern.compile(secondWordString);
+                Matcher stringToSearch = letterToFind.matcher(firstWordString);
+
+                if (stringToSearch.find()){
+                    int firstInstance = stringToSearch.start();
+                    currentOperation.remove(currentWord);
+                    currentOperation.remove(firstWord);
+                    currentOperation.remove(secondWord);
+                    return firstWordString.substring(firstInstance);
+                }else {
+                    throw new RuntimeException("Error! Could not find " + secondWordString + " in " + firstWordString);
+                }
 
             }else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '*' Operator correctly");

@@ -1,8 +1,1 @@
-2 3 4 + * out
-: fifteen 3 3 4 * + : fifteen fifteen + out
-' Hello World! ' out
-in out
-5 - out
-' Hello ' ' World! ' + out
-' Hello World! ' ' e ' * out
-' Hello World! ' - out
+' purple ' ' x ' * out
