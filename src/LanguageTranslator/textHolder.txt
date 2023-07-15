@@ -17,7 +17,7 @@ in out
 
 
 
-' hi ' ' world, ' ' how ' ' are, ' ' you? ' + + + +  out
+' hi ' ' world, ' ' how ' ' are ' ' you? ' + + + +  out
 ' helicopter ' ' e ' * out
 ' happy ' ' p ' * out
 : pineapple 1 80 - + : pineapple out

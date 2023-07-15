@@ -18,13 +18,13 @@ public class Word {
     // Regex used to define if a "Word" is call to run either a in or out operation on the stack
     private static String IORegex = "^in$|^out$";
     //Regex to allow potential quote strings or definition keys to pass. Allows all characters including punctuation (!?...)
-    private static String QuoteOrDefinition = "\\p{L}+";
+    private static String LetterString = "\\p{L}+";
 
     // Enumeration used to give each word a classification.
     // Classifications include : Numbers, Quotes, Definition, Stack Operations,
     // Input and output, and a string currently being used in a quote
-    //QuoteString and PotentialDefinition are used to temporarily mark any string that may be used as part of a quote operation or used as a definition key
-    public enum wordType {NUMBERS,QUOTES,DEFINITION,STACKOPERATION,IO,QUOTESTRING, PotentialDefinition}
+    //LetterString are used to temporarily mark any string that may be used as part of a quote operation or used as a definition key
+    public enum wordType {NUMBERS,QUOTES,DEFINITION,STACKOPERATION,IO, LetterString}
 
     // Each "Word" has a property word and a property type.
     // text -> the text that will be a word (ex.. hello, 5, out...)
@@ -87,8 +87,8 @@ public class Word {
 
         // Initialize a pattern and matcher used to check if a "Word" could potentially be used as part of a..
         // Quote or used as a Definition Key
-        Pattern QOrD = Pattern.compile(QuoteOrDefinition);
-        Matcher QOrDMatcher = QOrD.matcher(word);
+        Pattern Letters = Pattern.compile(LetterString);
+        Matcher LetterMatcher = Letters.matcher(word);
 
         //Check to determine a words wordType using the prior mentioned Regex..
         try {
@@ -108,8 +108,8 @@ public class Word {
             } else if (IOMatcher.find()) {
                 return wordType.IO;
                 // If the string is a combination of characters, set the type to potential definition so the program allows it to go through
-            }else if (QOrDMatcher.find()){
-                return wordType.PotentialDefinition;
+            }else if (LetterMatcher.find()){
+                return wordType.LetterString;
                 // If none of these match, throw a runtime error as the word is not valid
             }else {
                 throw new RuntimeException("Error when reading Words, Please ensure your script contains proper syntax for this translator... Make sure theres no whitespace in front of the first word on each line in your script :)    ");

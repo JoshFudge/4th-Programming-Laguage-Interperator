@@ -10,36 +10,62 @@ import java.util.regex.Pattern;
 
 public class Translator {
 
-
+    // A list of every word from the text file that will be used to calculations and operations with
     static ArrayList<Word> currentOperation = new ArrayList<>();
+    // A Boolean flag used to signal when a quote string is currently being created
     static Boolean quoteFlag = false;
+    // Boolean flag used to signal when a definition is currently being created
     static Boolean definitionFlag = false;
 
+    // Map used to contain all created definitions and their value
     static Map<String, Word> currentDefinitions = new HashMap<>();
 
-
+    /**
+     * Method that contains all logic and operation calls
+     * @param originalStack the original list of words created from the text file
+     * @throws RuntimeException if there's any syntax issues in the programs, an error will be thrown
+     */
     public static void translatePrograms(ArrayList<Word> originalStack) throws RuntimeException {
+        // A string that will hold the quote text while it is being created
          String quoteString = "";
+         // A string that will hold a definition name while it is being created
          String currentDefinition = "";
 
+         // Add every word in the text file to the operations list
         currentOperation.addAll(originalStack);
-        for (Word CurrentWord: originalStack) {
-            if (CurrentWord.getType() == Word.wordType.NUMBERS){
 
+        // Loop through every word in the text file.......
+        for (Word CurrentWord: originalStack) {
+            // If the word is a number...
+            if (CurrentWord.getType() == Word.wordType.NUMBERS){
+            // Do nothing / continue onto the next word
             }
 
+            // If the word is a Stack Operation key, check to see which one it is
             else if (CurrentWord.getType() == Word.wordType.STACKOPERATION) {
+                // If the word is a "+"...
                 if (Objects.equals(CurrentWord.getText(), "+")) {
+                    // Execute the plus method
                     ExecutePlus(CurrentWord);
+                    // If the word is a "-"...
                 } else if (Objects.equals(CurrentWord.getText(),"-")) {
+                    // Execute the Negation method
                    ExecuteNeg(CurrentWord);
+                    // If the word is a "*"...
                 } else if (Objects.equals(CurrentWord.getText(), "*")) {
+                    // call the multiply/String Regex method
                      ExecuteMultiply(CurrentWord);
+                     // If the word is the "pop" keyword...
                 } else if (Objects.equals(CurrentWord.getText(), "pop")) {
+                    // call the pop method
                     ExecutePop(CurrentWord);
+                    // If the word is the "swap" keyword...
                 }else if (Objects.equals(CurrentWord.getText(), "swap")) {
+                    // call the swap method
                     ExecuteSwap(CurrentWord);
+                    // If the word is the "dup" keyword...
                 }else if (Objects.equals(CurrentWord.getText(), "dup")) {
+                    // call the dup method
                     ExecuteDup(CurrentWord);
                 }
             } else if (CurrentWord.getType() == Word.wordType.QUOTES || quoteFlag) {
@@ -55,7 +81,7 @@ public class Translator {
                     else if (CurrentWord.getType() == Word.wordType.QUOTES && !quoteString.equals("")) {
                      quoteFlag = false;
                      currentOperation.remove(CurrentWord);
-                     currentOperation.add(0, new Word(quoteString, Word.wordType.QUOTESTRING));
+                     currentOperation.add(0, new Word(quoteString, Word.wordType.LetterString));
                      quoteString = "";
                     } else {
                         throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the quote operators correctly");
@@ -73,7 +99,7 @@ public class Translator {
                         currentOperation.remove(CurrentWord);
                     }
 
-                    else if (CurrentWord.getType() != Word.wordType.DEFINITION && CurrentWord.getType() == Word.wordType.PotentialDefinition){
+                    else if (CurrentWord.getType() != Word.wordType.DEFINITION && CurrentWord.getType() == Word.wordType.LetterString){
                         // get the definition identifier
                         currentDefinition = CurrentWord.getText();
                         currentOperation.remove(CurrentWord);
@@ -110,7 +136,7 @@ public class Translator {
 
                 currentOperation.add(0, currentDefinitions.get(CurrentWord.toString()));
                 currentOperation.remove(CurrentWord);
-            } else if (CurrentWord.getType() == Word.wordType.PotentialDefinition) {
+            } else if (CurrentWord.getType() == Word.wordType.LetterString) {
                 throw new RuntimeException("Syntax Error! Word " + CurrentWord.getText() + " is not a valid Word, Operation, Or Definition");
             }
         }
@@ -131,7 +157,7 @@ public class Translator {
 
                 currentOperation.add(0,new Word(answerAsString,Word.determineWordType(answerAsString)));
 
-            } else if (secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING) {
+            } else if (secondWord.getType() == Word.wordType.LetterString || firstWord.getType() == Word.wordType.LetterString) {
                 String output = "";
                 output += firstWord.getText() + " " + secondWord.getText();
 
@@ -157,7 +183,7 @@ public class Translator {
     }
 
     /**
-     * Method to conduct all of the operation that the '*' command will do to the stack
+     * Method to conduct all the operation that the '*' command will do to the stack
      * @param currentWord the current word being processed "*"
      */
     public static void ExecuteNeg(Word currentWord)  {
@@ -177,20 +203,21 @@ public class Translator {
                 currentOperation.set(currentOperation.indexOf(firstWord), new Word(negString, Word.wordType.NUMBERS));
 
                 // If the word on the top of the stack is a valid word that consists of characters..
-            } else if (firstWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.PotentialDefinition ){
-                // initalize a string as the reversed word
+            } else if (firstWord.getType() == Word.wordType.LetterString){
+                // initialize a string as the reversed word
                 String reverse = new StringBuilder(firstWord.getText()).reverse().toString();
                 // Remove any whitespace
                 reverse = reverse.replaceAll("\\s+","");
                 // Remove the "-" from the list
                 currentOperation.remove(currentWord);
                 // put the new word on top of the stack
-                currentOperation.set(0,new Word(reverse, Word.wordType.QUOTESTRING));
+                currentOperation.set(0,new Word(reverse, Word.wordType.LetterString));
 
+                // else, throw a new error as there is an issue with the program syntax
             }else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '-' Operator Correctly");
             }
-
+        // If any errors are caught, display a proper error message
         }catch (RuntimeException se){
             throw new java.lang.RuntimeException(se);
         }
@@ -211,7 +238,7 @@ public class Translator {
 
                 currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
 
-            } else if ((secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING)) {
+            } else if ((secondWord.getType() == Word.wordType.LetterString|| firstWord.getType() == Word.wordType.LetterString)) {
                 String firstWordString = firstWord.getText().replaceAll("\\s+","");
                 String secondWordString = secondWord.getText().replaceAll("\\s+","");
 
@@ -240,8 +267,6 @@ public class Translator {
             throw new java.lang.RuntimeException(e);
         }
     }
-
-
     /**
      * Method when called will conduct the specific operations on the stack
      * to replicate the "In" keyword command
@@ -263,7 +288,6 @@ public class Translator {
         // Return the user input created into a word object
         return new Word(userInput,Word.determineWordType(userInput));
     }
-
     /**
      * Method when called will conduct the specific operations on the stack
      * to replicate the "Out" keyword command
@@ -285,7 +309,6 @@ public class Translator {
             throw new RuntimeException("An error occurred while translating your code! Please ensure there is something to output on the stack.");
         }
     }
-
     /**
      * Method when called will conduct the specific operations on the stack
      * to replicate the "Pop" keyword command
@@ -307,7 +330,6 @@ public class Translator {
             throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the 'pop' command correctly");
         }
     }
-
     /**
      * Method when called will conduct the specific operations on the stack
      * to replicate the "Swap" keyword command
@@ -333,7 +355,6 @@ public class Translator {
             throw new RuntimeException("An error occurred while translating your code! Please ensure that there are words available on the stack to swap.");
         }
     }
-
     /**
      * Method when called will conduct the specific operations on the stack
      * to replicate the "Dup" keyword command

@@ -6,7 +6,7 @@ import java.util.*;
 public class Main {
     //TODO set up the commandline argument stuff, try sqashing any other bugs found
 
-    // Main mthod that will take a filepath as an argument to read from
+    // Main method that will take a filepath as an argument to read from
     public static void main(String[] args) throws RuntimeException {
         // If there is no arguments or too many, throw an error and display an error message..
         if (args.length != 1){
