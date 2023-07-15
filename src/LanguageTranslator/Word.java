@@ -10,14 +10,14 @@ public class Word {
     // Regex used to define if a "Word" is a number
     private static String numbersRegex = "^\\d+$";
     // Regex used to define if a "Word" is a quote or will be used in a quote
-    private static String quotesRegex = "[’']+";
+    private static String quotesRegex = "[']+";
     // Regex used to define if a "Word" will be used in  a definition
     private static String definitionRegex = "[:]";
     // Regex used to define if a "Word" is a call to do a specific stack operation
     private static String stackOperationRegex = "dup|swap|pop|[+*-]";
     // Regex used to define if a "Word" is call to run either a in or out operation on the stack
-    private static String IORegex = "in|out";
-
+    private static String IORegex = "^in$|^out$";
+    //Regex to allow potential quote strings or definition keys to pass. Allows all characters including punctuation (!?...)
     private static String QuoteOrDefinition = "\\p{L}+";
 
     // Enumeration used to give each word a classification.
@@ -112,7 +112,7 @@ public class Word {
                 return wordType.PotentialDefinition;
                 // If none of these match, throw a runtime error as the word is not valid
             }else {
-                throw new RuntimeException("Error when reading Words, Please ensure your script contains proper syntax for this Language... Make sure theres no whitespace in front of the first word on each line in your script :)    ");
+                throw new RuntimeException("Error when reading Words, Please ensure your script contains proper syntax for this translator... Make sure theres no whitespace in front of the first word on each line in your script :)    ");
             }
             // Catch any errors caught along the way and display the error
         }catch (RuntimeException e){

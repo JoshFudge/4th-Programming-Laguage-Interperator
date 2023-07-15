@@ -24,18 +24,17 @@ public class Translator {
 
         currentOperation.addAll(originalStack);
         for (Word CurrentWord: originalStack) {
-            if (CurrentWord.getType() == Word.wordType.NUMBERS){}
+            if (CurrentWord.getType() == Word.wordType.NUMBERS){
+
+            }
 
             else if (CurrentWord.getType() == Word.wordType.STACKOPERATION) {
                 if (Objects.equals(CurrentWord.getText(), "+")) {
-                    String answer = ExecutePlus(CurrentWord);
-                    currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
+                    ExecutePlus(CurrentWord);
                 } else if (Objects.equals(CurrentWord.getText(),"-")) {
-                    String answer = ExecuteNeg(CurrentWord);
-                    currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
+                   ExecuteNeg(CurrentWord);
                 } else if (Objects.equals(CurrentWord.getText(), "*")) {
-                    String answer = ExecuteMultiply(CurrentWord);
-                    currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
+                     ExecuteMultiply(CurrentWord);
                 } else if (Objects.equals(CurrentWord.getText(), "pop")) {
                     ExecutePop(CurrentWord);
                 }else if (Objects.equals(CurrentWord.getText(), "swap")) {
@@ -76,7 +75,7 @@ public class Translator {
 
                     else if (CurrentWord.getType() != Word.wordType.DEFINITION && CurrentWord.getType() == Word.wordType.PotentialDefinition){
                         // get the definition identifier
-                        currentDefinition += CurrentWord.getText();
+                        currentDefinition = CurrentWord.getText();
                         currentOperation.remove(CurrentWord);
 
                     }  else if (CurrentWord.getType() == Word.wordType.DEFINITION && !currentDefinition.equals("")) {
@@ -117,7 +116,7 @@ public class Translator {
         }
     }
 
-    public static String ExecutePlus(Word currentWord){
+    public static void ExecutePlus(Word currentWord){
         try{
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
             Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
@@ -127,15 +126,23 @@ public class Translator {
                 currentOperation.remove(currentWord);
                 currentOperation.remove(firstWord);
                 currentOperation.remove(secondWord);
-                return Integer.toString(total);
+
+                String answerAsString = Integer.toString(total);
+
+                currentOperation.add(0,new Word(answerAsString,Word.determineWordType(answerAsString)));
 
             } else if (secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING) {
                 String output = "";
                 output += firstWord.getText() + " " + secondWord.getText();
+
                 currentOperation.remove(currentWord);
+
+                currentOperation.add(currentOperation.indexOf(firstWord),new Word(output,Word.determineWordType(output)));
+
                 currentOperation.remove(firstWord);
                 currentOperation.remove(secondWord);
-                return output;
+
+
             }else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '+' Operator Correctly");
             }
@@ -149,23 +156,37 @@ public class Translator {
 
     }
 
-    public static String ExecuteNeg(Word currentWord)  {
+    /**
+     * Method to conduct all of the operation that the '*' command will do to the stack
+     * @param currentWord the current word being processed "*"
+     */
+    public static void ExecuteNeg(Word currentWord)  {
+        // Try the following:
         try{
+            // Get the word on the top of the stack
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
-
+            // If the word is a number
             if (firstWord.getType() == Word.wordType.NUMBERS)  {
+                // Multiply it by -1 to negate it
                 int neg = Integer.parseInt(firstWord.getText()) * (-1);
-
+                // Remove the "-" operation
                 currentOperation.remove(currentWord);
-                currentOperation.remove(0);
+                // Convert the negated number to a string
+                String negString = Integer.toString(neg);
+                // Set the index of the operated number to a new word of the negated number
+                currentOperation.set(currentOperation.indexOf(firstWord), new Word(negString, Word.wordType.NUMBERS));
 
-                return Integer.toString(neg);
-
-
+                // If the word on the top of the stack is a valid word that consists of characters..
             } else if (firstWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.PotentialDefinition ){
+                // initalize a string as the reversed word
                 String reverse = new StringBuilder(firstWord.getText()).reverse().toString();
+                // Remove any whitespace
+                reverse = reverse.replaceAll("\\s+","");
+                // Remove the "-" from the list
                 currentOperation.remove(currentWord);
-                return reverse;
+                // put the new word on top of the stack
+                currentOperation.set(0,new Word(reverse, Word.wordType.QUOTESTRING));
+
             }else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '-' Operator Correctly");
             }
@@ -175,7 +196,7 @@ public class Translator {
         }
     }
 
-    public static String ExecuteMultiply(Word currentWord){
+    public static void ExecuteMultiply(Word currentWord){
         try {
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
             Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
@@ -185,7 +206,11 @@ public class Translator {
                 currentOperation.remove(currentWord);
                 currentOperation.remove(firstWord);
                 currentOperation.remove(secondWord);
-                return Integer.toString(total);
+
+                String answer = Integer.toString(total);
+
+                currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
+
             } else if ((secondWord.getType() == Word.wordType.QUOTESTRING || firstWord.getType() == Word.wordType.QUOTESTRING)) {
                 String firstWordString = firstWord.getText().replaceAll("\\s+","");
                 String secondWordString = secondWord.getText().replaceAll("\\s+","");
@@ -198,7 +223,10 @@ public class Translator {
                     currentOperation.remove(currentWord);
                     currentOperation.remove(firstWord);
                     currentOperation.remove(secondWord);
-                    return firstWordString.substring(firstInstance);
+
+                    String result = firstWordString.substring(firstInstance);
+
+                    currentOperation.add(0,new Word(result,Word.determineWordType(result)));
                 }else {
                     throw new RuntimeException("Error! Could not find " + secondWordString + " in " + firstWordString);
                 }
@@ -292,9 +320,9 @@ public class Translator {
             Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
             // Set the top of the stack as the word that was initially second
-            currentOperation.set(0,secondWord);
+            currentOperation.set(0,firstWord);
             // Set the second word of the stack as the word that was initially first
-            currentOperation.set(1,firstWord);
+            currentOperation.set(1,secondWord);
             // Remove the 'swap' word from the stack
             currentOperation.remove(currentWord);
 
@@ -321,7 +349,7 @@ public class Translator {
             currentOperation.remove(currentWord);
 
             // If a IndexOutOfBounds Exception is caught
-            // caused by no item on the stack prior to the dup command..
+            // caused by no item on the stack prior to the dup command...
         }catch (IndexOutOfBoundsException e ){
             // Throw and error and display an error message
             throw new RuntimeException("An error occurred while translating your code! Please ensure there is an Word available to duplicate on the top of the stack.");
