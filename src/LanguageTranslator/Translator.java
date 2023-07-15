@@ -6,8 +6,6 @@ import java.io.InputStreamReader;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
 public class Translator {
 
     // A list of every word from the text file that will be used to calculations and operations with
@@ -68,112 +66,161 @@ public class Translator {
                     // call the dup method
                     ExecuteDup(CurrentWord);
                 }
+                // check and see if the word is a " ' " or if there's currently a quote string being created
             } else if (CurrentWord.getType() == Word.wordType.QUOTES || quoteFlag) {
+                // If so try the following...
                 try {
+                    // If it's the first " ' "...
                     if (CurrentWord.getType() == Word.wordType.QUOTES && quoteString.equals("")) {
+                        // Remove the " ' ",
                         currentOperation.remove(CurrentWord);
+                        // Turn the flag on to signal that a quote is currently being constructed
                         quoteFlag = true;
                     }
+                    // If the word isn't a " ' ",
                     else if (!Objects.equals(CurrentWord.getText(), "'")){
+                        // Add the word to the quoteString
                         quoteString +=  CurrentWord.getText() + " ";
+                        // Remove the word from the stack
                         currentOperation.remove(CurrentWord);
                     }
+                    // If it's the second " ' ",
                     else if (CurrentWord.getType() == Word.wordType.QUOTES && !quoteString.equals("")) {
+                        // Turn the flag off
                      quoteFlag = false;
+                     // Remove the " ' " from the stack
                      currentOperation.remove(CurrentWord);
+                     // Add the quote output string as a new word to the stack
                      currentOperation.add(0, new Word(quoteString, Word.wordType.LetterString));
+                     // Reset the string placeholder as the quote has ended
                      quoteString = "";
-                    } else {
+                    }
+                    // If anything else occurs... Throw a new error as the program syntax is incorrect
+                    else {
                         throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the quote operators correctly");
                     }
+                    // If any errors are caught, display an error message
                 }catch (RuntimeException e){
                     throw new java.lang.RuntimeException(e);
                 }
 
-
+                // If the word is a " : " or a definition is currently being defined,
             }  else if (CurrentWord.getType() == Word.wordType.DEFINITION || definitionFlag){
+                // Try the following...
                 try {
+                    // If its the first ":"..
                     if (CurrentWord.getType() == Word.wordType.DEFINITION && currentDefinition.equals("")){
-
+                        // Turn the flag on signaling that definition creation is currently underway
                         definitionFlag = true;
+                        // Remove the ":" from the stack
                         currentOperation.remove(CurrentWord);
                     }
-
-                    else if (CurrentWord.getType() != Word.wordType.DEFINITION && CurrentWord.getType() == Word.wordType.LetterString){
+                    // If the word is a letter string and the presumed definition key..
+                    else if (CurrentWord.getType() == Word.wordType.LetterString){
                         // get the definition identifier
                         currentDefinition = CurrentWord.getText();
+                        // remove the word from the stack
                         currentOperation.remove(CurrentWord);
 
+                        // If it's the final ":"
                     }  else if (CurrentWord.getType() == Word.wordType.DEFINITION && !currentDefinition.equals("")) {
-
+                        // Create a new word with the top item in the stack to be used as the definition value
                         Word definitionValue = new Word(currentOperation.get(0).toString(),currentOperation.get(0).getType());
 
+                        // Store the definition in the map with the definition string being the key, and the value being the top item on the stack
                         currentDefinitions.put(currentDefinition,definitionValue);
-
+                        // Set the flag to false as the definition has been created
                         definitionFlag = false;
+                        // Reset the Definition placeholder string
                         currentDefinition = "";
+                        // Remove the ":" from the stack
                         currentOperation.remove(CurrentWord);
+                        // Remove the definition value from the stack
                         currentOperation.remove(0);
-
+                    // If the word is anything else,
                     } else {
+                        // Throw an error as there is an issue with the program syntax
                         throw new RuntimeException("There is a problem with your Definition Code! Please ensure you have two ':' surrounding your definition");
                     }
+                    // If any exceptions are caught..
                 } catch (RuntimeException e){
+                    // Display an error message
                     throw new java.lang.RuntimeException(e);
                 }
             }
+            // If the word has the IO Word-type..
             else if (CurrentWord.getType() == Word.wordType.IO){
+                // If the word is the "in" keyword...
                 if (Objects.equals(CurrentWord.getText(), "in")){
-                    Word input = Translator.ExecuteIn();
+                    // call the in method
+                    Word input = ExecuteIn();
+                    // Set the user input to the index of the in command
                     currentOperation.set(currentOperation.indexOf(CurrentWord), input);
+                    // If the word is the "out" keyword...
                 } else if (Objects.equals(CurrentWord.getText(), "out")) {
+                    // call the out method
                     ExecuteOut(CurrentWord);
-                    if (!currentOperation.isEmpty() && Objects.equals(currentOperation.get(0).getText(), "out")){
-                        currentOperation.remove(0);
-                    }
                 }
+                // If the word is a definition stored in the Definitions Map..
             } else if (currentDefinitions.containsKey(CurrentWord.getText())) {
-
+                // Add the definition value to the stack
                 currentOperation.add(0, currentDefinitions.get(CurrentWord.toString()));
+                // Remove the definition key
                 currentOperation.remove(CurrentWord);
+
+                // If the word is a character string and hasnt been processed by a prior check...
             } else if (CurrentWord.getType() == Word.wordType.LetterString) {
+                // Throw error as it is not a valid word or is it being used in a definition or quote
                 throw new RuntimeException("Syntax Error! Word " + CurrentWord.getText() + " is not a valid Word, Operation, Or Definition");
             }
         }
     }
 
+    /**
+     * Method used to complete the operations that the "+" keyword will call
+     * @param currentWord the current word being procesed "+"
+     */
     public static void ExecutePlus(Word currentWord){
+        // Try the following...
         try{
+            // Get the top words on the stack
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
             Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
+            // If both words are numbers..
             if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS){
+                // Add both words together and store it as an int
                 int total = Integer.parseInt(firstWord.getText()) + Integer.parseInt(secondWord.getText());
+                // Remove the "+" from the stack
                 currentOperation.remove(currentWord);
+                // Remove the 2 numbers added together from the stack
                 currentOperation.remove(firstWord);
                 currentOperation.remove(secondWord);
 
+                // Convert the answer to a string
                 String answerAsString = Integer.toString(total);
-
+                // Add the answer to the stack as a new word
                 currentOperation.add(0,new Word(answerAsString,Word.determineWordType(answerAsString)));
 
+                // If either word is a string..
             } else if (secondWord.getType() == Word.wordType.LetterString || firstWord.getType() == Word.wordType.LetterString) {
+                // Initialize a string to store the concatenated words
                 String output = "";
+                // Concatenate the 2 two words
                 output += firstWord.getText() + " " + secondWord.getText();
-
+                // Remove the "+" from the stack
                 currentOperation.remove(currentWord);
-
+                // Add the concatenated word to the stack
                 currentOperation.add(currentOperation.indexOf(firstWord),new Word(output,Word.determineWordType(output)));
-
+                // Remove both words that were concatenated from the stack
                 currentOperation.remove(firstWord);
                 currentOperation.remove(secondWord);
-
-
+            // If a words does not pass any of the checks, throw an error as there's an issue wth the program syntax
             }else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '+' Operator Correctly");
             }
 
-
+            // Catch any error and display an error message
         } catch (IndexOutOfBoundsException IOE){
             throw new RuntimeException("There is a Syntax Error in your code! Please ensure it is coded correctly and try again!");
         }catch (RuntimeException e) {
@@ -183,8 +230,8 @@ public class Translator {
     }
 
     /**
-     * Method to conduct all the operation that the '*' command will do to the stack
-     * @param currentWord the current word being processed "*"
+     * Method to conduct all the operation that the '-' command will do to the stack
+     * @param currentWord the current word being processed "-"
      */
     public static void ExecuteNeg(Word currentWord)  {
         // Try the following:
@@ -210,7 +257,7 @@ public class Translator {
                 reverse = reverse.replaceAll("\\s+","");
                 // Remove the "-" from the list
                 currentOperation.remove(currentWord);
-                // put the new word on top of the stack
+                // put the new word on the stack
                 currentOperation.set(0,new Word(reverse, Word.wordType.LetterString));
 
                 // else, throw a new error as there is an issue with the program syntax
@@ -223,44 +270,65 @@ public class Translator {
         }
     }
 
+    /**
+     * Method to conduct all the operation that the '*' command will do to the stack
+     * @param currentWord the current word being processed "*"
+     */
     public static void ExecuteMultiply(Word currentWord){
+        // Try the following...
         try {
+            // get the two words on the stack that will be operated on
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
             Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
+            // If both words are numbers
             if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS) {
+                // Add them together and store the total
                 int total = Integer.parseInt(firstWord.getText()) * Integer.parseInt(secondWord.getText());
+                // Remove the "+" and the two numbers from the stack
                 currentOperation.remove(currentWord);
                 currentOperation.remove(firstWord);
                 currentOperation.remove(secondWord);
 
+                // Convert the answer to a string
                 String answer = Integer.toString(total);
-
+                // Add the answer to the stack as a new word
                 currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
 
+                // If either word is a string.. .
             } else if ((secondWord.getType() == Word.wordType.LetterString|| firstWord.getType() == Word.wordType.LetterString)) {
+                // get the two words that will be operated on
                 String firstWordString = firstWord.getText().replaceAll("\\s+","");
                 String secondWordString = secondWord.getText().replaceAll("\\s+","");
 
+                // Make the second word a regex pattern
                 Pattern letterToFind = Pattern.compile(secondWordString);
+                // Create a Matcher for the first string to search for the second string
                 Matcher stringToSearch = letterToFind.matcher(firstWordString);
 
+                // If the second string is found..
                 if (stringToSearch.find()){
+                    // Get the index of the first instance of the second string
                     int firstInstance = stringToSearch.start();
+                    // Remove the "*" and the two operated words
                     currentOperation.remove(currentWord);
                     currentOperation.remove(firstWord);
                     currentOperation.remove(secondWord);
 
+                    // Store a string that contains the substring of the first word that starts at the index of the second string
                     String result = firstWordString.substring(firstInstance);
 
+                    // Add the new string as a new word to the stack
                     currentOperation.add(0,new Word(result,Word.determineWordType(result)));
+                    // If the second string is not found, throw and error saying that there was no substring created
                 }else {
                     throw new RuntimeException("Error! Could not find " + secondWordString + " in " + firstWordString);
                 }
-
+                // If a word does not pass any of the checks, throw an error as there's an error with the program syntax
             }else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '*' Operator correctly");
             }
+            // Catch any error any display n error message
         } catch (IndexOutOfBoundsException IOE){
             throw new RuntimeException("There is a Syntax Error in your code! Please ensure it is coded correctly and try again!");
         }catch (RuntimeException e ){

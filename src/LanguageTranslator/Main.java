@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-    //TODO set up the commandline argument stuff, try sqashing any other bugs found
 
     // Main method that will take a filepath as an argument to read from
     public static void main(String[] args) throws RuntimeException {
@@ -18,7 +17,6 @@ public class Main {
 
         // Create a new file using the filepath argument entered when the program was started
         File FourthProgramingLanguageScript = new File(args[0]);
-//        File FourthProgramingLanguageScript = new File("src/LanguageTranslator/languageScript.txt");
 
         // Initialize a reader that calls the getFIleReader method and uses the created file
         BufferedReader reader = getFileReader(FourthProgramingLanguageScript);
@@ -34,7 +32,6 @@ public class Main {
 
         // Run the translatePrograms method that will do the calculations/operations
         Translator.translatePrograms(programs);
-
     }
 
     //Method to return a string array of each "word" in the script
@@ -45,7 +42,6 @@ public class Main {
         try {
             String line = "";
             while ((line = reader.readLine()) != null){
-
                 linesRead.add(line);
             }
         } catch (IOException e) {
@@ -63,9 +59,9 @@ public class Main {
             // For each word in the list add it to the whitespaceRemoved list
             for (String word: individualWords) {
                 noWhiteSpace.add(word);
-
             }
         }
+
         // Convert the noWhiteSpace list into an arrayList
         String[] linesReadArray = noWhiteSpace.toArray(new String[linesRead.size()]);
         //Return the converted list
