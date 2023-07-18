@@ -1,20 +1,2 @@
-2 3 4 + * out
-: fifteen 3 3 4 * + : fifteen fifteen + out
-' Hello World! ' out
-in out
-5 - out
-' Hello ' ' World! ' + out
-' Hello World! ' ' e ' * out
-' Hello World! ' - out
-' hi ' ' world, ' ' how ' ' are ' ' you? ' + + + +  out
-' helicopter ' ' e ' * out
-' happy ' ' p ' * out
-: pineapple 1 80 - + : pineapple out
-3 3 3 3 3 + + + + out
-3 2 100 pop + out
-15 dup * out
-' supercalifragilisticexpialidocious ' - out
-' supercalifragilisticexpialidocious ' ' e ' * out
-: backwardsShrimp ' shrimp ' - : backwardsShrimp out
-backwardsShrimp ' shrimp '  + out
-6 ' six ' + out
+553 ’ 5 ’ * out
+' We got 2 semesters left '  2  * out

@@ -6,17 +6,6 @@ in out
 ' Hello ' ' World! ' + out
 ' Hello World! ' ' e ' * out
 ' Hello World! ' - out
-
-
-
-
-
-
-
-
-
-
-
 ' hi ' ' world, ' ' how ' ' are ' ' you? ' + + + +  out
 ' helicopter ' ' e ' * out
 ' happy ' ' p ' * out
@@ -28,3 +17,4 @@ in out
 ' supercalifragilisticexpialidocious ' ' e ' * out
 : backwardsShrimp ' shrimp ' - : backwardsShrimp out
 backwardsShrimp ' shrimp '  + out
+6 ' six ' + out
