@@ -1,1 +1,14 @@
-' We got 2 semesters left '  2  * out
+2 3 4 + * out
+: fifteen 3 3 4 * + : fifteen fifteen + out
+' Hello World! ' out
+5 - out
+' Hello ' ' World! ' + out
+' Hello World! ' ' e ' * out
+' Hello World! ' - out
+' Hello ' dup - swap + out
+5 2 swap - + out
+5 5 3 pop + out
+5 ' Number is: ' swap + out
+5 ' is the number ' + out
+353  ' 5 ' * out
+' We got 2 semesters left ' ' 2 ' * out

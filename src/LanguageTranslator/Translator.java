@@ -36,7 +36,7 @@ public class Translator {
 
         // Loop through every word in the text file.......
         for (Word CurrentWord: originalStack) {
-            // If the word is a number...
+            // If the word is a number and there is not a quote currently being constructed...
             if (CurrentWord.getType() == Word.wordType.NUMBERS && !quoteFlag){
             // Do nothing / continue onto the next word
             }
@@ -170,7 +170,7 @@ public class Translator {
                 // Remove the definition key
                 currentOperation.remove(CurrentWord);
 
-                // If the word is a character string and hasnt been processed by a prior check...
+                // If the word is a character string and hasn't been processed by a prior check...
             } else if (CurrentWord.getType() == Word.wordType.LetterString) {
                 // Throw error as it is not a valid word or is it being used in a definition or quote
                 throw new RuntimeException("Syntax Error! Word " + CurrentWord.getText() + " is not a valid Word, Operation, Or Definition");
@@ -180,7 +180,7 @@ public class Translator {
 
     /**
      * Method used to complete the operations that the "+" keyword will call
-     * @param currentWord the current word being procesed "+"
+     * @param currentWord the current word being processed "+"
      */
     public static void ExecutePlus(Word currentWord){
         // Try the following...
@@ -189,7 +189,7 @@ public class Translator {
             Word firstWord = currentOperation.get(currentOperation.indexOf(currentWord) - 1);
             Word secondWord = currentOperation.get(currentOperation.indexOf(currentWord) - 2);
 
-            // If both words are numbers..
+            // If both words are numbers...
             if (firstWord.getType() == Word.wordType.NUMBERS && secondWord.getType() == Word.wordType.NUMBERS){
                 // Add both words together and store it as an int
                 int total = Integer.parseInt(firstWord.getText()) + Integer.parseInt(secondWord.getText());
@@ -204,7 +204,7 @@ public class Translator {
                 // Add the answer to the stack as a new word
                 currentOperation.add(0,new Word(answerAsString,Word.determineWordType(answerAsString)));
 
-                // If either word is a string..
+                // If either word is a string...
             } else if (secondWord.getType() == Word.wordType.LetterString || firstWord.getType() == Word.wordType.LetterString) {
                 // Initialize a string to store the concatenated words
                 String output = "";
@@ -256,7 +256,7 @@ public class Translator {
                 // initialize a string as the reversed word
                 String reverse = new StringBuilder(firstWord.getText()).reverse().toString();
                 // Remove any whitespace
-                reverse = reverse.replaceAll("\\s+","");
+                reverse = reverse.replaceFirst("\\s+","");
                 // Remove the "-" from the list
                 currentOperation.remove(currentWord);
                 // put the new word on the stack
@@ -297,10 +297,15 @@ public class Translator {
                 // Add the answer to the stack as a new word
                 currentOperation.add(0,new Word(answer,Word.determineWordType(answer)));
 
-                // If either word is a string.. .
-            } else if ((secondWord.getType() == Word.wordType.LetterString|| firstWord.getType() == Word.wordType.LetterString)) {
+                // If either word is a string...
+            } else if ((secondWord.getType() == Word.wordType.LetterString|| firstWord.getType() == Word.wordType.LetterString
+                    || // OR
+                    // if one word is a string and the other is a number...
+                    ((secondWord.getType() == Word.wordType.LetterString|| firstWord.getType() == Word.wordType.LetterString) && (secondWord.getType() == Word.wordType.NUMBERS|| firstWord.getType() == Word.wordType.NUMBERS))))
+            {
+
                 // get the two words that will be operated on
-                String firstWordString = firstWord.getText().replaceAll("\\s+","");
+                String firstWordString = firstWord.getText();
                 String secondWordString = secondWord.getText().replaceAll("\\s+","");
 
                 // Make the second word a regex pattern
@@ -308,7 +313,7 @@ public class Translator {
                 // Create a Matcher for the first string to search for the second string
                 Matcher stringToSearch = letterToFind.matcher(firstWordString);
 
-                // If the second string is found..
+                // If the second string is found...
                 if (stringToSearch.find()){
                     // Get the index of the first instance of the second string
                     int firstInstance = stringToSearch.start();
@@ -323,14 +328,15 @@ public class Translator {
                     // Add the new string as a new word to the stack
                     currentOperation.add(0,new Word(result,Word.determineWordType(result)));
                     // If the second string is not found, throw and error saying that there was no substring created
-                }else {
+                } else {
                     throw new RuntimeException("Error! Could not find " + secondWordString + " in " + firstWordString);
                 }
-                // If a word does not pass any of the checks, throw an error as there's an error with the program syntax
-            }else {
+            }
+            // If a word does not pass any of the checks, throw an error as there's an error with the program syntax
+            else {
                 throw new RuntimeException("An error occurred while translating your code! Please ensure your are using the '*' Operator correctly");
             }
-            // Catch any error any display n error message
+            // Catch any error any display an error message
         } catch (IndexOutOfBoundsException IOE){
             throw new RuntimeException("There is a Syntax Error in your code! Please ensure it is coded correctly and try again!");
         }catch (RuntimeException e ){

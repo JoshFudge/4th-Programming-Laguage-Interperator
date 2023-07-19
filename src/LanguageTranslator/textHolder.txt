@@ -1,12 +1,6 @@
-2 3 4 + * out
-: fifteen 3 3 4 * + : fifteen fifteen + out
-' Hello World! ' out
-in out
-5 - out
-' Hello ' ' World! ' + out
-' Hello World! ' ' e ' * out
-' Hello World! ' - out
-' hi ' ' world, ' ' how ' ' are ' ' you? ' + + + +  out
+
+MY EXAMPLES
+' hi ' ' world ' ' how ' ' are, ' ' you? ' + + + + out
 ' helicopter ' ' e ' * out
 ' happy ' ' p ' * out
 : pineapple 1 80 - + : pineapple out
@@ -16,9 +10,24 @@ in out
 ' supercalifragilisticexpialidocious ' - out
 ' supercalifragilisticexpialidocious ' ' e ' * out
 : backwardsShrimp ' shrimp ' - : backwardsShrimp out
-backwardsShrimp ' shrimp '  + out
-6 ' six ' + out
+backwardsShrimp ' shrimp ' + out
+backwardsShrimp backwardsShrimp + - out
 
 
+
+SCOTTS EXAMPLES
+2 3 4 + * out
+: fifteen 3 3 4 * + : fifteen fifteen + out
+' Hello World! ' out
+in out
+5 - out
+' Hello ' ' World! ' + out
+' Hello World! ' ' e ' * out
+' Hello World! ' - out
+' hello ' dup - swap + out
+5 2 swap - + out
+5 5 3 pop + out
+5 ' Number is: ' swap + out
+5 ' is the number ' + out
 353  ' 5 ' * out
-' We got 2 semesters left '  2  * out
+' We got 2 semesters left ' ' 2 ' * out
