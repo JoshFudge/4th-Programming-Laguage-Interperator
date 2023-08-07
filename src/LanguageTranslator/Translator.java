@@ -7,8 +7,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 public class Translator {
-    //TODO FIGURE OUT HOW TO regex and add a string if on of them is a number outside of quotes
-
 
     // A list of every word from the text file that will be used to calculations and operations with
     static ArrayList<Word> currentOperation = new ArrayList<>();

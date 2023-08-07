@@ -55,7 +55,6 @@ public class Main {
         for (int i = 0; i < linesRead.size(); i++){
             // Split the list by the whitespace in each line using Regex and put it into a list
             String[] individualWords = linesRead.get(i).split("\\s+");
-            System.out.println(Arrays.toString(individualWords));
             // For each word in the list add it to the whitespaceRemoved list
             for (String word: individualWords) {
                 noWhiteSpace.add(word);
